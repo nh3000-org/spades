@@ -1,0 +1,2 @@
+# spades
+Two Person Spades
