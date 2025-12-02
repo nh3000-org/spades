@@ -2,32 +2,15 @@ module github.com/nh3000-org/spades
 
 go 1.24.1
 
-require fyne.io/fyne/v2 v2.7.1
+require (
+	fyne.io/fyne v1.4.3
+	fyne.io/fyne/v2 v2.7.1
+)
 
 require (
-	github.com/boombuler/barcode v1.0.1 // indirect
-	github.com/f-amaral/go-async v0.3.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/hhrutter/lzw v1.0.0 // indirect
-	github.com/hhrutter/tiff v1.0.1 // indirect
-	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.7.1 // indirect
-	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/johnfercher/go-tree v1.1.0 // indirect
-	github.com/johnfercher/maroto/v2 v2.3.1 // indirect
-	github.com/jung-kurt/gofpdf v1.16.2 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
-	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/nats-io/nats.go v1.39.1 // indirect
-	github.com/nats-io/nkeys v0.4.9 // indirect
-	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pdfcpu/pdfcpu v0.6.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
+	github.com/rogpeppe/go-internal v1.13.1 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 require (
@@ -49,9 +32,7 @@ require (
 	github.com/hack-pad/safejs v0.1.0 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
-	github.com/nh3000-org/broadcast v0.0.0-20251124190603-0d688acccc60
 	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect

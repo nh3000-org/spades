@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"time"
+
 	"log"
 	"os"
 	"runtime"
@@ -9,7 +11,10 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/widget"
 	"github.com/nh3000-org/spades/config"
+	"github.com/nh3000-org/spades/config/cards"
 )
 
 type PlayerStat struct {
@@ -30,15 +35,13 @@ type NonPersonStat struct {
 	Hand   string
 }
 
-var NP = NonPersonStat{}
+var NPC = NonPersonStat{}
 
 type Deck struct {
 	Cards []string
 }
 
 var C = Deck{}
-
-var Rules = "Draw\n-Pick a Card\n-Keep or Discard The Draw\n\nBid\n-Number of Tricks\n-Nil\n\nScoring\n-Tricks * 10\n-Nil 100 If Made\nNil Minus 100 If Failure\n-Blind Nil 200 If Made\n-Vlind Nill Minus 200 If Failure\n\nBags\n-Over Tricks\n-10 Bags Minus 100"
 
 var memoryStats runtime.MemStats
 var ctxmain context.Context
@@ -54,6 +57,35 @@ func pick() {
 
 }
 func deal() {
+
+}
+
+func splash() {
+
+	header := canvas.NewImageFromResource(cards.NewEmbeddedResource("honors_spade-14.png"))
+	header.FillMode = canvas.ImageFillContain
+	config.FyneMainWin.SetContent(header)
+	time.Sleep(5 * time.Second)
+
+	rules := widget.NewMultiLineEntry()
+	rules.SetText(config.GetLangs("rules"))
+
+	config.FyneMainWin.SetContent(rules)
+
+	// pick a user name
+	// pick a dificulty
+	// pick a deck back
+
+	// deal a deck
+	/* 	next := widget.NewButton("Next", func() {
+		deal()
+	}) */
+	//img := cards.GetImage("honor_spades-14.png")
+
+	//header := fyne.NewStaticResource("HonorSpades",cards.GetImage("CardsFS/honor_spades-14.png").Resource.Content())
+	//h := container.NewCenter(header)
+	//border := container.NewBorder(header, next, nil, nil, header)
+	config.FyneMainWin.SetContent(header)
 
 }
 func main() {
@@ -80,5 +112,6 @@ func main() {
 	config.FyneApp.SetIcon(MyLogo)
 	config.FyneMainWin.SetTitle(config.GetLangs("title"))
 	config.FyneMainWin.Resize(fyne.NewSize(640, 480))
+	splash()
 	config.FyneMainWin.ShowAndRun()
 }

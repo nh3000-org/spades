@@ -70,16 +70,16 @@ func (m MyTheme) SetIcon(name fyne.ThemeIconName, variant fyne.ThemeVariant) {
 
 func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	/* 	var printit = true
-		if name == "foreground" {
-			printit = false
-		}
+	   	if name == "foreground" {
+	   		printit = false
+	   	}
 
-		if name == "background" {
-			printit = false
-		}
-		if printit {
-			log.Println("skin "+strconv.Itoa(Selected)+" name ", name)
-		} */
+	   	if name == "background" {
+	   		printit = false
+	   	}
+	   	if printit {
+	   		log.Println("skin "+strconv.Itoa(Selected)+" name ", name)
+	   	} */
 
 	//log.Println(name)
 	//log.Println("skin "+strconv.Itoa(Selected)+" name ", name)
@@ -91,6 +91,9 @@ func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 			return DarkShadow
 		}
 		if name == "scrollBar" {
+			return DarkScrollBar
+		}
+		if name == "scrollBarBackground" {
 			return DarkScrollBar
 		}
 		if name == "focus" {
@@ -164,6 +167,9 @@ func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 		if name == "scrollBar" {
 			return LightScrollBar
 		}
+		if name == "scrollBarBackground" {
+			return LightScrollBar
+		}
 		if name == "focus" {
 			return LightFocus
 		}
@@ -235,6 +241,9 @@ func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 			return RetroShadow
 		}
 		if name == "scrollBar" {
+			return RetroScrollBar
+		}
+		if name == "scrollBarBackground" {
 			return RetroScrollBar
 		}
 		if name == "focus" {
