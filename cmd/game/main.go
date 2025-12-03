@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"time"
 
 	"log"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/nh3000-org/spades/config"
 	"github.com/nh3000-org/spades/config/cards"
@@ -64,13 +64,26 @@ func splash() {
 
 	header := canvas.NewImageFromResource(cards.NewEmbeddedResource("honors_spade-14.png"))
 	header.FillMode = canvas.ImageFillContain
-	config.FyneMainWin.SetContent(header)
-	time.Sleep(5 * time.Second)
+	header.SetMinSize(fyne.NewSize(100, 100))
 
 	rules := widget.NewMultiLineEntry()
 	rules.SetText(config.GetLangs("rules"))
+	next := widget.NewButton("Next", func() {
+		deal()
+	})
+	difficultyShadow := config.FyneApp.Preferences().StringWithFallback("Difficulty", "Easy")
+	difficultylabel := widget.NewLabel(config.GetLangs("difficulty"))
+	difficulty := widget.NewRadioGroup([]string{"Easy", "hard"}, func(string) {})
+	difficulty.SetSelected(difficultyShadow)
+	difficulty.Horizontal = true
 
-	config.FyneMainWin.SetContent(rules)
+	rightbox := container.NewVBox(
+		widget.NewLabelWithStyle(config.GetLangs("preferences"), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		difficultylabel,
+		difficulty,
+	)
+	border := container.NewBorder(header, next, nil, rightbox, rules)
+	config.FyneMainWin.SetContent(border)
 
 	// pick a user name
 	// pick a dificulty
@@ -85,7 +98,6 @@ func splash() {
 	//header := fyne.NewStaticResource("HonorSpades",cards.GetImage("CardsFS/honor_spades-14.png").Resource.Content())
 	//h := container.NewCenter(header)
 	//border := container.NewBorder(header, next, nil, nil, header)
-	config.FyneMainWin.SetContent(header)
 
 }
 func main() {
