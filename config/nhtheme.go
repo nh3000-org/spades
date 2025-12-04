@@ -50,7 +50,7 @@ var LightHyperlink = color.RGBA{129, 137, 252, 1}
 var LightPrimary = color.RGBA{129, 137, 252, 255}
 
 var RetroButton = color.RGBA{116, 207, 103, 250}
-var RetroHover = color.RGBA{116, 207, 103, 1}
+var RetroHover = color.RGBA{116, 207, 103, 128}
 var RetroPressed = color.RGBA{116, 207, 103, 220}
 var RetroSelection = color.RGBA{116, 207, 103, 200}
 var RetroInputBackground = color.RGBA{116, 207, 103, 32}
@@ -61,7 +61,7 @@ var RetroScrollBar = color.RGBA{116, 207, 103, 250}
 var RetroFocus = color.RGBA{116, 207, 103, 64}
 var RetroPlaceholder = color.RGBA{116, 207, 103, 255}
 var RetroDisabled = color.RGBA{116, 207, 103, 64}
-var RetroHyperlink = color.RGBA{116, 207, 103, 1}
+var RetroHyperlink = color.RGBA{116, 207, 103, 250}
 var RetroPrimary = color.RGBA{116, 207, 103, 255}
 
 var GameButton = color.RGBA{253, 118, 87, 220}
@@ -358,7 +358,7 @@ func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 			return GameInputBorder
 		}
 		if name == "button" {
-				return GameButton
+			return GameButton
 		}
 		if name == "foreground" {
 			return GameForeground
