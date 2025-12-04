@@ -5,15 +5,17 @@ import (
 
 	"time"
 
-	//"time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/storage"
 )
 
 var FyneApp fyne.App
 var FyneMainWin fyne.Window
-
+var PlayerName string
+var Difficulty string
+var DeckBack string // red yellow purple grey green
+var PlayerBid int   // 1-13 14 for nil 15 for blind nil
+var NPCBid int      // 1-13 14 for nil 15 for blind nil
 func GetDateTime(offsethours string) string {
 	ct := time.Now()
 

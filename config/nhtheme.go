@@ -15,10 +15,10 @@ type MyTheme struct{}
 var Dark = 0
 var Light = 1
 var Retro = 2
+var Game = 3
 
 var Selected = 0
 
-// var DarkButton = color.RGBA{162, 168, 250, 64}
 var DarkButton = color.RGBA{187, 188, 201, 32}
 var DarkHover = color.RGBA{187, 188, 201, 64}
 var DarkPressed = color.RGBA{187, 188, 201, 220}
@@ -64,25 +64,29 @@ var RetroDisabled = color.RGBA{116, 207, 103, 64}
 var RetroHyperlink = color.RGBA{116, 207, 103, 1}
 var RetroPrimary = color.RGBA{116, 207, 103, 255}
 
+var GameButton = color.RGBA{253, 118, 87, 220}
+var GameHover = color.RGBA{116, 207, 103, 1}
+var GamePressed = color.RGBA{116, 207, 103, 220}
+var GameSelection = color.RGBA{116, 207, 103, 200}
+var GameInputBackground = color.RGBA{116, 207, 103, 32}
+var GameInputBorder = color.RGBA{116, 207, 103, 250}
+var GameSeparator = color.Black
+var GameShadow = color.RGBA{116, 207, 103, 64}
+var GameScrollBar = color.RGBA{116, 207, 103, 250}
+var GameFocus = color.RGBA{116, 207, 103, 64}
+var GamePlaceholder = color.RGBA{116, 207, 103, 255}
+var GameDisabled = color.RGBA{116, 207, 103, 64}
+var GameHyperlink = color.RGBA{116, 207, 103, 1}
+var GamePrimary = color.RGBA{116, 207, 103, 255}
+var GameForeground = color.White
+var GameBackground = color.RGBA{8, 66, 12, 1}
+
 func (m MyTheme) SetIcon(name fyne.ThemeIconName, variant fyne.ThemeVariant) {
 
 }
 
 func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
-	/* 	var printit = true
-	   	if name == "foreground" {
-	   		printit = false
-	   	}
 
-	   	if name == "background" {
-	   		printit = false
-	   	}
-	   	if printit {
-	   		log.Println("skin "+strconv.Itoa(Selected)+" name ", name)
-	   	} */
-
-	//log.Println(name)
-	//log.Println("skin "+strconv.Itoa(Selected)+" name ", name)
 	if Selected == Dark {
 		if name == "separator" {
 			return DarkSeparator
@@ -307,6 +311,81 @@ func (m MyTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) colo
 			log.Println("nhskin missing name ", name)
 		}
 	}
+	if Selected == Game {
+		if name == "separator" {
+			return GameSeparator
+		}
+		if name == "shadow" {
+			return GameShadow
+		}
+		if name == "scrollBar" {
+			return GameScrollBar
+		}
+		if name == "scrollBarBackground" {
+			return GameScrollBar
+		}
+		if name == "focus" {
+			return GameFocus
+		}
+		if name == "placeholder" {
+			return GamePlaceholder
+		}
+		if name == "disabled" {
+			return GameDisabled
+		}
+		if name == "disabledButton" {
+			return GameDisabled
+		}
+		if name == "hyperlink" {
+			return GameHyperlink
+		}
+		if name == "primary" {
+			return GamePrimary
+		}
+		if name == "hover" {
+			return GameButton
+		}
+		if name == "selection" {
+			return GameSelection
+		}
+		if name == "pressed" {
+			return GamePressed
+		}
+		if name == "inputBackground" {
+			return GameInputBackground
+		}
+		if name == "inputBorder" {
+			return GameInputBorder
+		}
+		if name == "button" {
+				return GameButton
+		}
+		if name == "foreground" {
+			return GameForeground
+		}
+		if name == "background" {
+			return GameBackground
+		}
+		if name == "menuBackground" {
+			return color.White
+		}
+		if name == "overlayBackground" {
+			return color.White
+		}
+		if name == theme.ColorNameBackground {
+			return color.Black
+		}
+		if name == "foregroundOnPrimary" {
+			return color.White
+		}
+		if name == "headerBackground" {
+			return RetroInputBackground
+		}
+		if name != "disabled" {
+			log.Println("nhskin missing name ", name)
+		}
+	}
+
 	log.Println("default ", name)
 	return theme.DefaultTheme().Color(name, variant)
 }
