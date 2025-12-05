@@ -12,10 +12,19 @@ import (
 var FyneApp fyne.App
 var FyneMainWin fyne.Window
 var PlayerName string
+var DealerPlayer bool
 var Difficulty string
 var DeckBack string // red yellow purple grey green
 var PlayerBid int   // 1-13 14 for nil 15 for blind nil
+var PlayerBags int
 var NPCBid int      // 1-13 14 for nil 15 for blind nil
+var NPCBags int
+var PlayerScore int
+var NPCScore int
+var PlayerHistory int
+var NPCHistory int
+var PlayerTricks int
+var NPCTricks int
 func GetDateTime(offsethours string) string {
 	ct := time.Now()
 

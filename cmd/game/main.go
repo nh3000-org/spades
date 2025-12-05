@@ -1,8 +1,9 @@
 package main
 
 import (
-	"context"
+	"strconv"
 
+	tc "image/color"
 	"log"
 	"os"
 	"runtime"
@@ -17,7 +18,7 @@ import (
 	"github.com/nh3000-org/spades/config/cards"
 )
 
-type PlayerStat struct {
+/* type PlayerStat struct {
 	Score  string
 	Bags   string
 	Bids   string
@@ -35,17 +36,17 @@ type NonPersonStat struct {
 	Hand   string
 }
 
-var NPC = NonPersonStat{}
+var NPC = NonPersonStat{} */
 
 type Deck struct {
 	Cards []string
 }
 
 var C = Deck{}
-
 var memoryStats runtime.MemStats
-var ctxmain context.Context
-var ctxmaincan context.CancelFunc
+var spadesheader *canvas.Image
+var deckbackimage *canvas.Image
+var deckbackname string
 
 func discard() {
 
@@ -56,15 +57,122 @@ func keep() {
 func pick() {
 
 }
-func deal() {
+func createDeck() {
 
+}
+func deal() {
+	runtime.GC()
+	runtime.ReadMemStats(&memoryStats)
+	createDeck()
+	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
+	deckbackimage.FillMode = canvas.ImageFillContain
+	deckbackimage.SetMinSize(fyne.NewSize(50, 50))
+	labelcolor := tc.RGBA{253, 118, 87, 255}
+	// player status
+	playerbidlabel := canvas.NewText("Bid:", labelcolor)
+	playerbidlabel.TextSize = 32
+	playerbidbagslabel := canvas.NewText("Bags:", labelcolor)
+	playerbidbagslabel.TextSize = 32
+	playerbidscorelabel := canvas.NewText("Score:", labelcolor)
+	playerbidscorelabel.TextSize = 32
+	playerbidtrickslabel := canvas.NewText("Tricks:", labelcolor)
+	playerbidtrickslabel.TextSize = 32
+	playerbidname := canvas.NewText(config.PlayerName, tc.White)
+	playerbidname.TextSize = 32
+	playerbid := canvas.NewText("0", tc.White)
+	playerbid.TextSize = 32
+	playerbags := canvas.NewText("0", tc.White)
+	playerbags.TextSize = 32
+	playerscore := canvas.NewText("0", tc.White)
+	playerscore.TextSize = 32
+	playertricks := canvas.NewText("0", tc.White)
+	playertricks.TextSize = 32
+	bidplayer := container.NewHBox(
+		playerbidname,
+		playerbidlabel,
+		playerbid,
+		playerbidbagslabel,
+		playerbags,
+		playerbidscorelabel,
+		playerscore,
+		playerbidtrickslabel,
+		playertricks,
+	)
+
+	// npc status
+	npcbidlabel := canvas.NewText("Bid:", labelcolor)
+	npcbidlabel.TextSize = 32
+	npcbidbagslabel := canvas.NewText("Bags:", labelcolor)
+	npcbidbagslabel.TextSize = 32
+	npcbidscorelabel := canvas.NewText("Score:", labelcolor)
+	npcbidscorelabel.TextSize = 32
+	npcbidtrickslabel := canvas.NewText("Tricks:", labelcolor)
+	npcbidtrickslabel.TextSize = 32
+	npcbidname := canvas.NewText("NPC", tc.White)
+	npcbidname.TextSize = 32
+	npcbid := canvas.NewText("0", tc.White)
+	npcbid.TextSize = 32
+	npcbags := canvas.NewText("0", tc.White)
+	npcbags.TextSize = 32
+	npcscore := canvas.NewText("0", tc.White)
+	npcscore.TextSize = 32
+	npctricks := canvas.NewText("0", tc.White)
+	npctricks.TextSize = 32
+	bidnpc := container.NewHBox(
+		npcbidname,
+		npcbidlabel,
+		npcbid,
+		npcbidbagslabel,
+		npcbags,
+		npcbidscorelabel,
+		npcscore,
+		npcbidtrickslabel,
+		npctricks,
+	)
+
+	playerdiscard := canvas.NewText(" Player Discards 0", tc.White)
+	playerhand := container.NewHBox()
+	card := canvas.NewImageFromResource(cards.NewEmbeddedResource("2C.png"))
+	card.FillMode = canvas.ImageFillContain
+	card.SetMinSize(fyne.NewSize(100, 100))
+	playerhand.Add(card)
+	npcdiscard := canvas.NewText("NPC Discards 0", tc.White)
+
+	keep := widget.NewButton("Keep", func() {
+		keep()
+
+	})
+	discard := widget.NewButton("Discard", func() {
+
+	})
+	blindnil := widget.NewButton("Blind Nil", func() {
+
+	})
+	regularnil := widget.NewButton("Nil", func() {
+
+	})
+	bid := widget.NewButton("Bid", func() {
+
+	})
+	bidbar := container.NewGridWithColumns(5)
+	bidbar.Add(keep)
+	bidbar.Add(discard)
+	bidbar.Add(blindnil)
+	bidbar.Add(regularnil)
+	bidbar.Add(bid)
+	playerboard := container.NewBorder(bidbar, nil, nil, nil, card)
+	bidboard := container.NewBorder(nil, playerboard, nil, nil, deckbackimage)
+	gameboard := container.NewBorder(bidnpc, bidplayer, npcdiscard, playerdiscard, bidboard)
+	config.FyneMainWin.SetContent(gameboard)
 }
 
 func splash() {
-
-	header := canvas.NewImageFromResource(cards.NewEmbeddedResource("honors_spade-14.png"))
-	header.FillMode = canvas.ImageFillContain
-	header.SetMinSize(fyne.NewSize(100, 100))
+	runtime.GC()
+	runtime.ReadMemStats(&memoryStats)
+	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
+	spadesheader = canvas.NewImageFromResource(cards.NewEmbeddedResource("honors_spade-14.png"))
+	spadesheader.FillMode = canvas.ImageFillContain
+	spadesheader.SetMinSize(fyne.NewSize(30, 30))
 
 	rules := widget.NewMultiLineEntry()
 	rules.SetText(config.GetLangs("rules"))
@@ -106,29 +214,19 @@ func splash() {
 		config.FyneApp.Preferences().SetString("Difficulty", difficulty.Selected)
 		config.Difficulty = difficulty.Selected
 		config.FyneApp.Preferences().SetString("Deckback", deckback.Selected)
+
+		deckbackname = strings.ToLower(deckback.Selected) + "_back.png"
+		deckbackimage = canvas.NewImageFromResource(cards.NewEmbeddedResource(deckbackname))
 		config.DeckBack = deckback.Selected
+		config.DealerPlayer = true
 		deal()
 	})
-	border := container.NewBorder(header, next, nil, rightbox, rules)
+	border := container.NewBorder(spadesheader, next, nil, rightbox, rules)
 	config.FyneMainWin.SetContent(border)
-
-	// pick a user name
-	// pick a dificulty
-	// pick a deck back
-
-	// deal a deck
-	/* 	next := widget.NewButton("Next", func() {
-		deal()
-	}) */
-	//img := cards.GetImage("honor_spades-14.png")
-
-	//header := fyne.NewStaticResource("HonorSpades",cards.GetImage("CardsFS/honor_spades-14.png").Resource.Content())
-	//h := container.NewCenter(header)
-	//border := container.NewBorder(header, next, nil, nil, header)
 
 }
 func main() {
-	var a = app.NewWithID("org.nh3000.spades")
+	a := app.NewWithID("org.nh3000.spades")
 	config.FyneApp = a
 	var w = a.NewWindow("Spades 4 Two")
 	config.FyneMainWin = w
@@ -148,8 +246,10 @@ func main() {
 	if iconerr != nil {
 		log.Println("icon.png error ", iconerr.Error())
 	}
+	runtime.GC()
+	runtime.ReadMemStats(&memoryStats)
 	config.FyneApp.SetIcon(MyLogo)
-	config.FyneMainWin.SetTitle(config.GetLangs("title"))
+	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
 	config.FyneMainWin.Resize(fyne.NewSize(640, 480))
 	splash()
 	config.FyneMainWin.ShowAndRun()
