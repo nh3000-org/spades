@@ -1,4 +1,4 @@
-package cards
+package getcards
 
 import (
 	"embed"
@@ -17,6 +17,7 @@ type EmbededResource struct {
 
 // id is 2C.png for two of clubs, JH.png for jack of hearts...
 func NewEmbeddedResource(path string) *EmbededResource {
+	// translate
 	bytes, err := CardsFS.ReadFile(path)
 	if err != nil {
 		log.Println("CardFS Not found", err)

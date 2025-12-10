@@ -15,58 +15,44 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/nh3000-org/spades/config"
-	"github.com/nh3000-org/spades/config/cards"
+	getcards "github.com/nh3000-org/spades/config/cards"
 )
 
-/* type PlayerStat struct {
-	Score  string
-	Bags   string
-	Bids   string
-	Tricks string
-	Hand   string
+type Player struct {
+	deck *Deck
+	hand Cards
 }
 
-var PS = PlayerStat{}
+var PlayerGame config.PS
+var NPCGame config.PS
 
-type NonPersonStat struct {
-	Score  string
-	Bags   string
-	Bids   string
-	Tricks string
-	Hand   string
-}
-
-var NPC = NonPersonStat{} */
-
-type Deck struct {
-	Cards []string
-}
-
-var C = Deck{}
 var memoryStats runtime.MemStats
 var spadesheader *canvas.Image
-var deckbackimage *canvas.Image
+
+// var deckbackimage *canvas.Image
 var deckbackname string
 
-func discard() {
+func discard(player bool) {
 
 }
-func keep() {
+func keep(player bool) {
 
 }
-func pick() {
+func pick(player bool) {
 
 }
-func createDeck() {
+
+func hand(player bool) {
 
 }
+
 func deal() {
 	runtime.GC()
 	runtime.ReadMemStats(&memoryStats)
-	createDeck()
+
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
-	deckbackimage.FillMode = canvas.ImageFillContain
-	deckbackimage.SetMinSize(fyne.NewSize(50, 50))
+	//deckbackimage.FillMode = canvas.ImageFillContain
+	//deckbackimage.SetMinSize(fyne.NewSize(50, 50))
 	labelcolor := tc.RGBA{253, 118, 87, 255}
 	// player status
 	playerbidlabel := canvas.NewText("Bid:", labelcolor)
@@ -132,14 +118,10 @@ func deal() {
 
 	playerdiscard := canvas.NewText(" Player Discards 0", tc.White)
 	playerhand := container.NewHBox()
-	card := canvas.NewImageFromResource(cards.NewEmbeddedResource("2C.png"))
-	card.FillMode = canvas.ImageFillContain
-	card.SetMinSize(fyne.NewSize(100, 100))
-	playerhand.Add(card)
+
 	npcdiscard := canvas.NewText("NPC Discards 0", tc.White)
 
 	keep := widget.NewButton("Keep", func() {
-		keep()
 
 	})
 	discard := widget.NewButton("Discard", func() {
@@ -160,17 +142,48 @@ func deal() {
 	bidbar.Add(blindnil)
 	bidbar.Add(regularnil)
 	bidbar.Add(bid)
+
+	card := canvas.NewImageFromResource(getcards.NewEmbeddedResource("2C.png"))
+	deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource("AS.png"))
+	deckbackimage.SetMinSize(fyne.NewSize(100, 100))
+	card.FillMode = canvas.ImageFillContain
+	card.SetMinSize(fyne.NewSize(100, 100))
+	playerhand.Add(card)
 	playerboard := container.NewBorder(bidbar, nil, nil, nil, card)
 	bidboard := container.NewBorder(nil, playerboard, nil, nil, deckbackimage)
 	gameboard := container.NewBorder(bidnpc, bidplayer, npcdiscard, playerdiscard, bidboard)
+	d := NewDeck()
+	d.Shuffle()
+
+	gplayer := Player{deck: &d}
+	dc, dcerr := d.Draw()
+	if dcerr != nil {
+		log.Println("draw card ", dcerr)
+	}
+	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
+	mycard := dc.Rank.String() + dc.Suit.String() + ".png"
+	/// make 52 image + deckback as separate the dislay
+	deckbackimage.Resource = getcards.NewEmbeddedResource(mycard)
+	deckbackimage.SetMinSize(fyne.NewSize(100, 100))
+	deckbackimage.Refresh()
+	deckbackimage.Show()
+
+	//gplayer := Player{deck: &d}
+
+	bidboard.Refresh()
+	gameboard.Refresh()
+	config.FyneMainWin.Canvas().Refresh(deckbackimage)
 	config.FyneMainWin.SetContent(gameboard)
+
+	//config.FyneMainWin.Canvas().Refresh(deckbackimage)
+
 }
 
 func splash() {
 	runtime.GC()
 	runtime.ReadMemStats(&memoryStats)
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
-	spadesheader = canvas.NewImageFromResource(cards.NewEmbeddedResource("honors_spade-14.png"))
+	spadesheader = canvas.NewImageFromResource(getcards.NewEmbeddedResource("honors_spade-14.png"))
 	spadesheader.FillMode = canvas.ImageFillContain
 	spadesheader.SetMinSize(fyne.NewSize(30, 30))
 
@@ -215,11 +228,14 @@ func splash() {
 		config.Difficulty = difficulty.Selected
 		config.FyneApp.Preferences().SetString("Deckback", deckback.Selected)
 
-		deckbackname = strings.ToLower(deckback.Selected) + "_back.png"
-		deckbackimage = canvas.NewImageFromResource(cards.NewEmbeddedResource(deckbackname))
+		//deckbackname = strings.ToLower(deckback.Selected) + "_back.png"
+		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(deckbackname))
 		config.DeckBack = deckback.Selected
 		config.DealerPlayer = true
+		PlayerGame = config.NewPlayer(player.Text)
+		NPCGame = config.NewPlayer("NPC")
 		deal()
+
 	})
 	border := container.NewBorder(spadesheader, next, nil, rightbox, rules)
 	config.FyneMainWin.SetContent(border)
