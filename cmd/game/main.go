@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"image"
 	"strconv"
 
 	tc "image/color"
+	"image/png"
 	"log"
 	"os"
 	"runtime"
@@ -13,6 +16,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/nh3000-org/spades/config"
 	getcards "github.com/nh3000-org/spades/config/cards"
@@ -29,9 +33,6 @@ var NPCGame config.PS
 var memoryStats runtime.MemStats
 var spadesheader *canvas.Image
 
-// var deckbackimage *canvas.Image
-var deckbackname string
-
 func discard(player bool) {
 
 }
@@ -45,16 +46,52 @@ func pick(player bool) {
 func hand(player bool) {
 
 }
+func cropImage(c string) *canvas.Image {
+	log.Println("cropImage ", c)
+	back := getcards.NewEmbeddedResource(c)
+	img, _, err := image.Decode(bytes.NewReader(back.Content()))
+	type subImager interface {
+		SubImage(r image.Rectangle) image.Image
+	}
+	if err != nil {
+		log.Println("image does not support cropping")
+	}
+	// img is an Image interface. This checks if the underlying value has a
+	// method called SubImage. If it does, then we can use SubImage to crop the
+	// image.
+	simg, ok := img.(subImager)
+	if !ok {
+		log.Println("image does not support cropping")
+	}
+	my_sub_image := simg.(interface {
+		SubImage(r image.Rectangle) image.Image
+	}).SubImage(image.Rect(0, 0, 100, 1096))
+	log.Println(my_sub_image.Bounds())
+	var b []byte
+	err1 := png.Encode(bytes.NewBuffer(b), my_sub_image)
+	if err1 != nil {
+		log.Println("inithand", err1)
 
-func deal() {
-	runtime.GC()
-	runtime.ReadMemStats(&memoryStats)
+	}
+	backimg := canvas.NewImageFromImage(my_sub_image)
+	//PlayerCards.Add(backimg)
+	//NPCCards.Add(backimg)
+	return backimg
+}
 
-	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
-	//deckbackimage.FillMode = canvas.ImageFillContain
-	//deckbackimage.SetMinSize(fyne.NewSize(50, 50))
+var PlayerBid *canvas.Text
+var PlayerBags *canvas.Text
+var PlayerScore *canvas.Text
+var PlayerTricks *canvas.Text
+var PlayerScoreBar *fyne.Container
+var NPCBid *canvas.Text
+var NPCBags *canvas.Text
+var NPCScore *canvas.Text
+var NPCTricks *canvas.Text
+var NPCScoreBar *fyne.Container
+
+func scoreboard() {
 	labelcolor := tc.RGBA{253, 118, 87, 255}
-	// player status
 	playerbidlabel := canvas.NewText("Bid:", labelcolor)
 	playerbidlabel.TextSize = 32
 	playerbidbagslabel := canvas.NewText("Bags:", labelcolor)
@@ -65,27 +102,26 @@ func deal() {
 	playerbidtrickslabel.TextSize = 32
 	playerbidname := canvas.NewText(config.PlayerName, tc.White)
 	playerbidname.TextSize = 32
-	playerbid := canvas.NewText("0", tc.White)
-	playerbid.TextSize = 32
-	playerbags := canvas.NewText("0", tc.White)
-	playerbags.TextSize = 32
-	playerscore := canvas.NewText("0", tc.White)
-	playerscore.TextSize = 32
-	playertricks := canvas.NewText("0", tc.White)
-	playertricks.TextSize = 32
-	bidplayer := container.NewHBox(
+	PlayerBid = canvas.NewText("0", tc.White)
+	PlayerBid.TextSize = 32
+	PlayerBags = canvas.NewText("0", tc.White)
+	PlayerBags.TextSize = 32
+	PlayerScore = canvas.NewText("0", tc.White)
+	PlayerScore.TextSize = 32
+	PlayerTricks = canvas.NewText("0", tc.White)
+	PlayerTricks.TextSize = 32
+	PlayerScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		playerbidname,
 		playerbidlabel,
-		playerbid,
+		PlayerBid,
 		playerbidbagslabel,
-		playerbags,
+		PlayerBags,
 		playerbidscorelabel,
-		playerscore,
+		PlayerScore,
 		playerbidtrickslabel,
-		playertricks,
+		PlayerTricks,
 	)
-
-	// npc status
+	// npc
 	npcbidlabel := canvas.NewText("Bid:", labelcolor)
 	npcbidlabel.TextSize = 32
 	npcbidbagslabel := canvas.NewText("Bags:", labelcolor)
@@ -96,62 +132,102 @@ func deal() {
 	npcbidtrickslabel.TextSize = 32
 	npcbidname := canvas.NewText("NPC", tc.White)
 	npcbidname.TextSize = 32
-	npcbid := canvas.NewText("0", tc.White)
-	npcbid.TextSize = 32
-	npcbags := canvas.NewText("0", tc.White)
-	npcbags.TextSize = 32
-	npcscore := canvas.NewText("0", tc.White)
-	npcscore.TextSize = 32
-	npctricks := canvas.NewText("0", tc.White)
-	npctricks.TextSize = 32
-	bidnpc := container.NewHBox(
+	NPCBid = canvas.NewText("0", tc.White)
+	NPCBid.TextSize = 32
+	NPCBags = canvas.NewText("0", tc.White)
+	NPCBags.TextSize = 32
+	NPCScore = canvas.NewText("0", tc.White)
+	NPCScore.TextSize = 32
+	NPCTricks = canvas.NewText("0", tc.White)
+	NPCTricks.TextSize = 32
+	NPCScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		npcbidname,
 		npcbidlabel,
-		npcbid,
+		NPCBid,
 		npcbidbagslabel,
-		npcbags,
+		NPCBags,
 		npcbidscorelabel,
-		npcscore,
+		NPCScore,
 		npcbidtrickslabel,
-		npctricks,
+		NPCTricks,
 	)
+}
 
-	playerdiscard := canvas.NewText(" Player Discards 0", tc.White)
-	playerhand := container.NewHBox()
+var PlayerCards *fyne.Container
+var NPCCards *fyne.Container
 
-	npcdiscard := canvas.NewText("NPC Discards 0", tc.White)
+func gamecards() {
+	PlayerCards = container.NewHBox()
+	NPCCards = container.NewHBox()
 
-	keep := widget.NewButton("Keep", func() {
+}
+
+var GameBoard fyne.Container
+
+func deal() {
+	runtime.GC()
+	runtime.ReadMemStats(&memoryStats)
+
+	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
+
+	scoreboard()
+	gamecards()
+
+	NPCkeep := widget.NewButton("Keep", func() {
 
 	})
-	discard := widget.NewButton("Discard", func() {
+	NPCdiscard := widget.NewButton("Discard", func() {
 
 	})
-	blindnil := widget.NewButton("Blind Nil", func() {
+	NPCblindnil := widget.NewButton("Blind Nil", func() {
 
 	})
-	regularnil := widget.NewButton("Nil", func() {
+	NPCregularnil := widget.NewButton("Nil", func() {
 
 	})
-	bid := widget.NewButton("Bid", func() {
+	NPCbid := widget.NewButton("Bid", func() {
 
 	})
-	bidbar := container.NewGridWithColumns(5)
-	bidbar.Add(keep)
-	bidbar.Add(discard)
-	bidbar.Add(blindnil)
-	bidbar.Add(regularnil)
-	bidbar.Add(bid)
+	NPCbidbar := container.NewGridWithColumns(5)
+	NPCbidbar.Add(NPCkeep)
+	NPCbidbar.Add(NPCdiscard)
+	NPCbidbar.Add(NPCblindnil)
+	NPCbidbar.Add(NPCregularnil)
+	NPCbidbar.Add(NPCbid)
 
-	card := canvas.NewImageFromResource(getcards.NewEmbeddedResource("2C.png"))
-	deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource("AS.png"))
+	Playerkeep := widget.NewButton("Keep", func() {
+
+	})
+	Playerdiscard := widget.NewButton("Discard", func() {
+
+	})
+	Playerblindnil := widget.NewButton("Blind Nil", func() {
+
+	})
+	Playerregularnil := widget.NewButton("Nil", func() {
+
+	})
+	Playerbid := widget.NewButton("Bid", func() {
+
+	})
+	Playerbidbar := container.NewGridWithColumns(5)
+	Playerbidbar.Add(Playerkeep)
+	Playerbidbar.Add(Playerdiscard)
+	Playerbidbar.Add(Playerblindnil)
+	Playerbidbar.Add(Playerregularnil)
+	Playerbidbar.Add(Playerbid)
+
+	//card := getcards.NewEmbeddedResource(config.DeckBack)
+	//cropImage(strings.ToLower(config.DeckBack) + "_back.png")
+	//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource("AS.png"))
+	//deckbackimage := cropImage(strings.ToLower(config.DeckBack) + "_back.png")
+	deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(strings.ToLower(config.DeckBack) + "_back.png"))
 	deckbackimage.SetMinSize(fyne.NewSize(100, 100))
-	card.FillMode = canvas.ImageFillContain
-	card.SetMinSize(fyne.NewSize(100, 100))
-	playerhand.Add(card)
-	playerboard := container.NewBorder(bidbar, nil, nil, nil, card)
-	bidboard := container.NewBorder(nil, playerboard, nil, nil, deckbackimage)
-	gameboard := container.NewBorder(bidnpc, bidplayer, npcdiscard, playerdiscard, bidboard)
+	deckbackimage.FillMode = canvas.ImageFillContain
+
+	//PlayerCards.Add(deckbackimage)
+	//NPCCards.Add(deckbackimage)
+
 	d := NewDeck()
 	d.Shuffle()
 
@@ -163,17 +239,28 @@ func deal() {
 	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
 	mycard := dc.Rank.String() + dc.Suit.String() + ".png"
 	/// make 52 image + deckback as separate the dislay
-	deckbackimage.Resource = getcards.NewEmbeddedResource(mycard)
-	deckbackimage.SetMinSize(fyne.NewSize(100, 100))
-	deckbackimage.Refresh()
-	deckbackimage.Show()
+	// this how to refresh image
+	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
+	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(mycard))
+	mycardimage.SetMinSize(fyne.NewSize(100, 100))
+	mycardimage.FillMode = canvas.ImageFillContain
+	mycardimage.Refresh()
+	mycardimage.Show()
 
-	//gplayer := Player{deck: &d}
+	PlayerCards.Add(mycardimage)
+	//NPCCards.Add(deckbackimage)
 
-	bidboard.Refresh()
-	gameboard.Refresh()
-	config.FyneMainWin.Canvas().Refresh(deckbackimage)
-	config.FyneMainWin.SetContent(gameboard)
+	// NEW LAYOUT
+	GameBoard = *container.NewGridWithRows(7)
+	GameBoard.Add(NPCScoreBar)
+	GameBoard.Add(NPCbidbar)
+	GameBoard.Add(NPCCards)
+	GameBoard.Add(deckbackimage)
+	GameBoard.Add(PlayerCards)
+
+	GameBoard.Add(Playerbidbar)
+	GameBoard.Add(PlayerScoreBar)
+	config.FyneMainWin.SetContent(&GameBoard)
 
 	//config.FyneMainWin.Canvas().Refresh(deckbackimage)
 

@@ -20,7 +20,7 @@ func NewEmbeddedResource(path string) *EmbededResource {
 	// translate
 	bytes, err := CardsFS.ReadFile(path)
 	if err != nil {
-		log.Println("CardFS Not found", err)
+		log.Println("CardFS Not found", err, path)
 	}
 	return &EmbededResource{
 		path:  path,
