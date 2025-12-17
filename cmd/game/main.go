@@ -65,7 +65,7 @@ func cropImage(c string) *canvas.Image {
 	}
 	my_sub_image := simg.(interface {
 		SubImage(r image.Rectangle) image.Image
-	}).SubImage(image.Rect(0, 0, 100, 1096))
+	}).SubImage(image.Rect(0, 0, 200, 300))
 	log.Println(my_sub_image.Bounds())
 	var b []byte
 	err1 := png.Encode(bytes.NewBuffer(b), my_sub_image)
@@ -73,10 +73,10 @@ func cropImage(c string) *canvas.Image {
 		log.Println("inithand", err1)
 
 	}
-	backimg := canvas.NewImageFromImage(my_sub_image)
+	cardimg := canvas.NewImageFromImage(my_sub_image)
 	//PlayerCards.Add(backimg)
 	//NPCCards.Add(backimg)
-	return backimg
+	return cardimg
 }
 
 var PlayerBid *canvas.Text
@@ -163,6 +163,9 @@ func gamecards() {
 }
 
 var GameBoard fyne.Container
+var DrawCard string
+var DrawRank string
+var DrawSuit string
 
 func deal() {
 	runtime.GC()
@@ -196,7 +199,10 @@ func deal() {
 	NPCbidbar.Add(NPCbid)
 
 	Playerkeep := widget.NewButton("Keep", func() {
-
+		c := cropImage(DrawCard)
+		c.FillMode = canvas.ImageFillContain
+		c.SetMinSize(fyne.NewSize(100, 100))
+		PlayerCards.Add(c)
 	})
 	Playerdiscard := widget.NewButton("Discard", func() {
 
@@ -237,11 +243,13 @@ func deal() {
 		log.Println("draw card ", dcerr)
 	}
 	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
-	mycard := dc.Rank.String() + dc.Suit.String() + ".png"
+	DrawRank = dc.Rank.String()
+	DrawSuit = dc.Suit.String()
+	DrawCard = DrawRank + DrawSuit + ".png"
 	/// make 52 image + deckback as separate the dislay
 	// this how to refresh image
 	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
-	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(mycard))
+	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
 	mycardimage.SetMinSize(fyne.NewSize(100, 100))
 	mycardimage.FillMode = canvas.ImageFillContain
 	mycardimage.Refresh()
