@@ -162,10 +162,101 @@ func gamecards() {
 
 }
 
+var PlayerTurn bool
+var TurnCount int // 1 is first turn // 2 is second trun
+var Buttonkeep = 1
+var Buttondiscard = 2
+var Buttonblindnil = 3
+var Buttonregularnil = 4
+
+func Turn(button int) {
+	TurnCount++
+	if TurnCount > 3 {
+		if PlayerTurn {
+			PlayerTurn = false
+		} else {
+			PlayerTurn = true
+		}
+		TurnCount = 1
+	}
+	log.Println("Turn", PlayerTurn, TurnCount)
+	if TurnCount == 1 {
+		// player
+		if PlayerTurn {
+			if button == Buttonkeep {
+				Playerkeep.Disable()
+				Playerdiscard.Enable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			if button == Buttondiscard {
+				Playerkeep.Enable()
+				Playerdiscard.Disable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			HandleCard()
+		}
+		// npc
+		if !PlayerTurn {
+			if button == Buttonkeep {
+				Playerkeep.Disable()
+				Playerdiscard.Enable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			if button == Buttondiscard {
+				Playerkeep.Enable()
+				Playerdiscard.Disable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			HandleCard()
+		}
+	}
+	if TurnCount == 2 {
+
+	}
+
+}
+func HandleCard() {
+	dc, dcerr := MyDeck.Draw()
+	if dcerr != nil {
+		log.Println("draw card ", dcerr)
+	}
+	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
+	DrawRank = dc.Rank.String()
+	DrawSuit = dc.Suit.String()
+	DrawCard = DrawRank + DrawSuit + ".png"
+	/// make 52 image + deckback as separate the dislay
+	// this how to refresh image
+	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
+	//mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
+	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+	mycardimage.SetMinSize(fyne.NewSize(100, 100))
+	mycardimage.FillMode = canvas.ImageFillContain
+	mycardimage.Refresh()
+	mycardimage.Show()
+
+	PlayerCards.Add(mycardimage)
+}
+
 var GameBoard fyne.Container
+var MyDeck = NewDeck()
+var Gameplayer = Player{}
+var NPCplayer = Player{}
 var DrawCard string
 var DrawRank string
 var DrawSuit string
+var Playerkeep *widget.Button
+var Playerdiscard *widget.Button
+var Playerblindnil *widget.Button
+var Playerregularnil *widget.Button
+var Playerbid *widget.Button
 
 func deal() {
 	runtime.GC()
@@ -198,30 +289,36 @@ func deal() {
 	NPCbidbar.Add(NPCregularnil)
 	NPCbidbar.Add(NPCbid)
 
-	Playerkeep := widget.NewButton("Keep", func() {
+	Playerkeep = widget.NewButton("Keep", func() {
 		c := cropImage(DrawCard)
 		c.FillMode = canvas.ImageFillContain
 		c.SetMinSize(fyne.NewSize(100, 100))
 		PlayerCards.Add(c)
-	})
-	Playerdiscard := widget.NewButton("Discard", func() {
+		Turn(Buttonkeep)
 
 	})
-	Playerblindnil := widget.NewButton("Blind Nil", func() {
+	Playerdiscard = widget.NewButton("Discard", func() {
 
 	})
-	Playerregularnil := widget.NewButton("Nil", func() {
+	Playerblindnil = widget.NewButton("Blind Nil", func() {
 
 	})
-	Playerbid := widget.NewButton("Bid", func() {
+	Playerregularnil = widget.NewButton("Nil", func() {
 
 	})
+	Playerbid = widget.NewButton("Bid", func() {
+
+	})
+	Playerbid.Disable()
 	Playerbidbar := container.NewGridWithColumns(5)
 	Playerbidbar.Add(Playerkeep)
 	Playerbidbar.Add(Playerdiscard)
 	Playerbidbar.Add(Playerblindnil)
 	Playerbidbar.Add(Playerregularnil)
 	Playerbidbar.Add(Playerbid)
+
+	Playerregularnil.Disable()
+	Playerbid.Disable()
 
 	//card := getcards.NewEmbeddedResource(config.DeckBack)
 	//cropImage(strings.ToLower(config.DeckBack) + "_back.png")
@@ -234,30 +331,32 @@ func deal() {
 	//PlayerCards.Add(deckbackimage)
 	//NPCCards.Add(deckbackimage)
 
-	d := NewDeck()
-	d.Shuffle()
+	MyDeck = NewDeck()
+	MyDeck.Shuffle()
 
-	gplayer := Player{deck: &d}
-	dc, dcerr := d.Draw()
-	if dcerr != nil {
-		log.Println("draw card ", dcerr)
-	}
-	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
-	DrawRank = dc.Rank.String()
-	DrawSuit = dc.Suit.String()
-	DrawCard = DrawRank + DrawSuit + ".png"
-	/// make 52 image + deckback as separate the dislay
-	// this how to refresh image
-	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
-	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-	mycardimage.SetMinSize(fyne.NewSize(100, 100))
-	mycardimage.FillMode = canvas.ImageFillContain
-	mycardimage.Refresh()
-	mycardimage.Show()
+	Gameplayer = Player{deck: &MyDeck}
+	NPCplayer = Player{deck: &MyDeck}
+	log.Println(Gameplayer.hand, NPCplayer.hand)
+	/* 	dc, dcerr := d.Draw()
+	   	if dcerr != nil {
+	   		log.Println("draw card ", dcerr)
+	   	}
+	   	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
+	   	DrawRank = dc.Rank.String()
+	   	DrawSuit = dc.Suit.String()
+	   	DrawCard = DrawRank + DrawSuit + ".png"
+	   	/// make 52 image + deckback as separate the dislay
+	   	// this how to refresh image
+	   	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
+	   	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+	   	mycardimage.SetMinSize(fyne.NewSize(100, 100))
+	   	mycardimage.FillMode = canvas.ImageFillContain
+	   	mycardimage.Refresh()
+	   	mycardimage.Show()
 
-	PlayerCards.Add(mycardimage)
+	   	PlayerCards.Add(mycardimage) */
 	//NPCCards.Add(deckbackimage)
-
+	HandleCard()
 	// NEW LAYOUT
 	GameBoard = *container.NewGridWithRows(7)
 	GameBoard.Add(NPCScoreBar)
