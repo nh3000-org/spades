@@ -170,6 +170,7 @@ var Buttonblindnil = 3
 var Buttonregularnil = 4
 
 func Turn(button int) {
+	log.Println("Turn count", TurnCount, "playerturn", PlayerTurn)
 	TurnCount++
 	if TurnCount > 3 {
 		if PlayerTurn {
@@ -223,6 +224,9 @@ func Turn(button int) {
 	}
 
 }
+
+var Mycardimage canvas.Image
+
 func HandleCard() {
 	dc, dcerr := MyDeck.Draw()
 	if dcerr != nil {
@@ -235,17 +239,18 @@ func HandleCard() {
 	/// make 52 image + deckback as separate the dislay
 	// this how to refresh image
 	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
-	//mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
-	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-	mycardimage.SetMinSize(fyne.NewSize(100, 100))
-	mycardimage.FillMode = canvas.ImageFillContain
-	mycardimage.Refresh()
-	mycardimage.Show()
+	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
+	//mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+	Mycardimage.SetMinSize(fyne.NewSize(100, 100))
+	Mycardimage.FillMode = canvas.ImageFillContain
+	Mycardimage.Refresh()
+	Mycardimage.Show()
 
-	PlayerCards.Add(mycardimage)
+	//PlayerCards.Add(mycardimage)
 }
 
 var GameBoard fyne.Container
+var LastAction = ""
 var MyDeck = NewDeck()
 var Gameplayer = Player{}
 var NPCplayer = Player{}
@@ -290,15 +295,17 @@ func deal() {
 	NPCbidbar.Add(NPCbid)
 
 	Playerkeep = widget.NewButton("Keep", func() {
+		LastAction = "KEEP"
 		c := cropImage(DrawCard)
-		c.FillMode = canvas.ImageFillContain
+		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 		c.SetMinSize(fyne.NewSize(100, 100))
 		PlayerCards.Add(c)
 		Turn(Buttonkeep)
 
 	})
 	Playerdiscard = widget.NewButton("Discard", func() {
-
+		LastAction = "DISCARD"
+		Turn(Buttondiscard)
 	})
 	Playerblindnil = widget.NewButton("Blind Nil", func() {
 
@@ -358,18 +365,19 @@ func deal() {
 	//NPCCards.Add(deckbackimage)
 	HandleCard()
 	// NEW LAYOUT
+	DrawnCard := container.NewGridWithColumns(1)
+	DrawnCard.Add(&Mycardimage)
 	GameBoard = *container.NewGridWithRows(7)
 	GameBoard.Add(NPCScoreBar)
 	GameBoard.Add(NPCbidbar)
 	GameBoard.Add(NPCCards)
 	GameBoard.Add(deckbackimage)
+	GameBoard.Add(DrawnCard)
 	GameBoard.Add(PlayerCards)
 
 	GameBoard.Add(Playerbidbar)
 	GameBoard.Add(PlayerScoreBar)
 	config.FyneMainWin.SetContent(&GameBoard)
-
-	//config.FyneMainWin.Canvas().Refresh(deckbackimage)
 
 }
 
@@ -422,8 +430,6 @@ func splash() {
 		config.Difficulty = difficulty.Selected
 		config.FyneApp.Preferences().SetString("Deckback", deckback.Selected)
 
-		//deckbackname = strings.ToLower(deckback.Selected) + "_back.png"
-		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(deckbackname))
 		config.DeckBack = deckback.Selected
 		config.DealerPlayer = true
 		PlayerGame = config.NewPlayer(player.Text)
