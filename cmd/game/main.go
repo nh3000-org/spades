@@ -157,8 +157,8 @@ var PlayerCards *fyne.Container
 var NPCCards *fyne.Container
 
 func gamecards() {
-	PlayerCards = container.NewHBox()
-	NPCCards = container.NewHBox()
+	PlayerCards = container.NewCenter()
+	NPCCards = container.NewCenter()
 
 }
 
@@ -365,9 +365,9 @@ func deal() {
 	//NPCCards.Add(deckbackimage)
 	HandleCard()
 	// NEW LAYOUT
-	DrawnCard := container.NewGridWithColumns(1)
+	DrawnCard := container.NewCenter()
 	DrawnCard.Add(&Mycardimage)
-	GameBoard = *container.NewGridWithRows(7)
+	GameBoard = *container.NewVBox()
 	GameBoard.Add(NPCScoreBar)
 	GameBoard.Add(NPCbidbar)
 	GameBoard.Add(NPCCards)
