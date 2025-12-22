@@ -202,20 +202,19 @@ func Turn(button int) {
 		}
 		// npc
 		if !PlayerTurn {
-			if button == Buttonkeep {
-				Playerkeep.Disable()
-				Playerdiscard.Enable()
-				Playerblindnil.Disable()
-				Playerregularnil.Disable()
-				Playerbid.Disable()
-			}
-			if button == Buttondiscard {
-				Playerkeep.Enable()
-				Playerdiscard.Disable()
-				Playerblindnil.Disable()
-				Playerregularnil.Disable()
-				Playerbid.Disable()
-			}
+
+			Playerkeep.Disable()
+			Playerdiscard.Enable()
+			Playerblindnil.Disable()
+			Playerregularnil.Disable()
+			Playerbid.Disable()
+
+			Playerkeep.Enable()
+			Playerdiscard.Disable()
+			Playerblindnil.Disable()
+			Playerregularnil.Disable()
+			Playerbid.Disable()
+
 			HandleCard()
 		}
 	}
