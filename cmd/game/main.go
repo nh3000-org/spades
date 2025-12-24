@@ -79,6 +79,7 @@ func cropImage(c string) *canvas.Image {
 	return cardimg
 }
 
+var CardsLeft *canvas.Text
 var PlayerBid *canvas.Text
 var PlayerBags *canvas.Text
 var PlayerScore *canvas.Text
@@ -156,12 +157,6 @@ func scoreboard() {
 var PlayerCards *fyne.Container
 var NPCCards *fyne.Container
 
-func gamecards() {
-	PlayerCards = container.NewCenter()
-	NPCCards = container.NewCenter()
-
-}
-
 var PlayerTurn bool
 var TurnCount int // 1 is first turn // 2 is second trun
 var Buttonkeep = 1
@@ -172,7 +167,7 @@ var Buttonregularnil = 4
 func Turn(button int) {
 	log.Println("Turn count", TurnCount, "playerturn", PlayerTurn)
 	TurnCount++
-	if TurnCount > 3 {
+	if TurnCount > 2 {
 		if PlayerTurn {
 			PlayerTurn = false
 		} else {
@@ -180,7 +175,7 @@ func Turn(button int) {
 		}
 		TurnCount = 1
 	}
-	log.Println("Turn", PlayerTurn, TurnCount)
+
 	if TurnCount == 1 {
 		// player
 		if PlayerTurn {
@@ -208,17 +203,40 @@ func Turn(button int) {
 			Playerblindnil.Disable()
 			Playerregularnil.Disable()
 			Playerbid.Disable()
+			Playerkeep.Tapped(nil)
+			HandleCard()
+
+		}
+	}
+	if TurnCount == 2 {
+		if PlayerTurn {
+			if button == Buttonkeep {
+				Playerkeep.Disable()
+				Playerdiscard.Enable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			if button == Buttondiscard {
+				Playerkeep.Enable()
+				Playerdiscard.Disable()
+				Playerblindnil.Disable()
+				Playerregularnil.Disable()
+				Playerbid.Disable()
+			}
+			HandleCard()
+		}
+		if !PlayerTurn {
 
 			Playerkeep.Enable()
 			Playerdiscard.Disable()
 			Playerblindnil.Disable()
 			Playerregularnil.Disable()
 			Playerbid.Disable()
+			Playerdiscard.Tapped(nil)
 
 			HandleCard()
 		}
-	}
-	if TurnCount == 2 {
 
 	}
 
@@ -227,11 +245,15 @@ func Turn(button int) {
 var Mycardimage canvas.Image
 
 func HandleCard() {
+
 	dc, dcerr := MyDeck.Draw()
 	if dcerr != nil {
 		log.Println("draw card ", dcerr)
 	}
-	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
+	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
+	CardsLeft.TextSize = 32
+	CardsLeft.Refresh()
+	log.Println("draw card ", strconv.Itoa(len(MyDeck)), dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
 	DrawRank = dc.Rank.String()
 	DrawSuit = dc.Suit.String()
 	DrawCard = DrawRank + DrawSuit + ".png"
@@ -269,7 +291,8 @@ func deal() {
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
 
 	scoreboard()
-	gamecards()
+	PlayerCards = container.NewCenter()
+	NPCCards = container.NewCenter()
 
 	NPCkeep := widget.NewButton("Keep", func() {
 
@@ -304,6 +327,7 @@ func deal() {
 	})
 	Playerdiscard = widget.NewButton("Discard", func() {
 		LastAction = "DISCARD"
+
 		Turn(Buttondiscard)
 	})
 	Playerblindnil = widget.NewButton("Blind Nil", func() {
@@ -364,13 +388,16 @@ func deal() {
 	//NPCCards.Add(deckbackimage)
 	HandleCard()
 	// NEW LAYOUT
+	DeckCard := container.NewCenter()
+	DeckCard.Add(deckbackimage)
 	DrawnCard := container.NewCenter()
 	DrawnCard.Add(&Mycardimage)
 	GameBoard = *container.NewVBox()
 	GameBoard.Add(NPCScoreBar)
 	GameBoard.Add(NPCbidbar)
 	GameBoard.Add(NPCCards)
-	GameBoard.Add(deckbackimage)
+	GameBoard.Add(DeckCard)
+	GameBoard.Add(CardsLeft)
 	GameBoard.Add(DrawnCard)
 	GameBoard.Add(PlayerCards)
 
