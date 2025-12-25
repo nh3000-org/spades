@@ -250,9 +250,10 @@ func HandleCard() {
 	if dcerr != nil {
 		log.Println("draw card ", dcerr)
 	}
-	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
-	CardsLeft.TextSize = 32
-	CardsLeft.Refresh()
+	//CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
+	//CardsLeft.TextSize = 32
+	CardsLeft.Text = strconv.Itoa(len(MyDeck))
+
 	log.Println("draw card ", strconv.Itoa(len(MyDeck)), dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
 	DrawRank = dc.Rank.String()
 	DrawSuit = dc.Suit.String()
@@ -363,7 +364,8 @@ func deal() {
 
 	MyDeck = NewDeck()
 	MyDeck.Shuffle()
-
+	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
+	CardsLeft.TextSize = 32
 	Gameplayer = Player{deck: &MyDeck}
 	NPCplayer = Player{deck: &MyDeck}
 	log.Println(Gameplayer.hand, NPCplayer.hand)
