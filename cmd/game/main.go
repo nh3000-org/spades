@@ -65,7 +65,7 @@ func cropImage(c string) *canvas.Image {
 	}
 	my_sub_image := simg.(interface {
 		SubImage(r image.Rectangle) image.Image
-	}).SubImage(image.Rect(0, 0, 100, 300))
+	}).SubImage(image.Rect(0, 0, 100, 200))
 	//log.Println(my_sub_image.Bounds())
 	var b []byte
 	err1 := png.Encode(bytes.NewBuffer(b), my_sub_image)
@@ -74,7 +74,8 @@ func cropImage(c string) *canvas.Image {
 
 	}
 	cardimg := canvas.NewImageFromImage(my_sub_image)
-	cardimg.SetMinSize(fyne.NewSize(100, 100))
+
+	cardimg.SetMinSize(fyne.NewSize(100, 200))
 	return cardimg
 }
 
@@ -212,7 +213,7 @@ func HandleCard() {
 	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
 	//mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-	Mycardimage.SetMinSize(fyne.NewSize(100, 100))
+	Mycardimage.SetMinSize(fyne.NewSize(100, 200))
 	Mycardimage.FillMode = canvas.ImageFillContain
 	Mycardimage.Refresh()
 	Mycardimage.Show()
@@ -366,8 +367,15 @@ func setupgui() {
 	Playerregularnil.Disable()
 	Playerbid.Disable()
 
+	//PlayerCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
+	//PlayerCards = container.New(PlayerCardsLayout)
+
 	PlayerCards = container.NewGridWithColumns(13)
+
 	NPCCards = container.NewGridWithColumns(13)
+
+	//NPCCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
+	//NPCCards = container.New(NPCCardsLayout)
 
 	DeckCard = container.NewCenter()
 	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
