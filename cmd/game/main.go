@@ -312,14 +312,14 @@ func setupgui() {
 	)
 
 	NPCkeep = widget.NewButton("Keep", func() {
-		deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-		deckbackimage.SetMinSize(fyne.NewSize(100, 100))
-		deckbackimage.FillMode = canvas.ImageFillContain
-		NPCCards.Add(deckbackimage)
-		///c := cropImage(DrawCard)
-		//c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
-		//c.SetMinSize(fyne.NewSize(100, 100))
-		//NPCCards.Add(c)
+		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+		//deckbackimage.SetMinSize(fyne.NewSize(100, 100))
+		//deckbackimage.FillMode = canvas.ImageFillContain
+		//NPCCards.Add(deckbackimage)
+		c := cropImage(DrawCard)
+		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+		c.SetMinSize(fyne.NewSize(50, 100))
+		NPCCards.Add(c)
 
 	})
 	NPCdiscard = widget.NewButton("Discard", func() {
