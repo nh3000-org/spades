@@ -47,9 +47,10 @@ func hand(player bool) {
 
 }
 func cropImage(c string) *canvas.Image {
-	//log.Println("cropImage ", c)
+	log.Println("cropImage ", c)
 	back := getcards.NewEmbeddedResource(c)
 	img, _, err := image.Decode(bytes.NewReader(back.Content()))
+
 	type subImager interface {
 		SubImage(r image.Rectangle) image.Image
 	}
@@ -65,7 +66,7 @@ func cropImage(c string) *canvas.Image {
 	}
 	my_sub_image := simg.(interface {
 		SubImage(r image.Rectangle) image.Image
-	}).SubImage(image.Rect(0, 0, 100, 200))
+	}).SubImage(image.Rect(0, 0, 100, 300))
 	//log.Println(my_sub_image.Bounds())
 	var b []byte
 	err1 := png.Encode(bytes.NewBuffer(b), my_sub_image)
@@ -75,7 +76,7 @@ func cropImage(c string) *canvas.Image {
 	}
 	cardimg := canvas.NewImageFromImage(my_sub_image)
 
-	cardimg.SetMinSize(fyne.NewSize(100, 200))
+	cardimg.SetMinSize(fyne.NewSize(100, 300))
 	return cardimg
 }
 
@@ -111,9 +112,12 @@ func Turn(button int) {
 		if PlayerTurn == "PLAYER" {
 			PlayerTurn = "NPC"
 			done = true
+			log.Println("in player")
+
 		}
 		if PlayerTurn == "NPC" && !done {
 			PlayerTurn = "PLAYER"
+			log.Println("in npc")
 		}
 		TurnCount = 1
 	}
@@ -170,7 +174,7 @@ func Turn(button int) {
 			NPCdiscard.Tapped(nil)
 
 			HandleCard()
-			TurnCount = 1
+			TurnCount = 0
 			PlayerTurn = "PLAYER"
 		}
 		/* 		if PlayerTurn == "NPC" {
@@ -308,10 +312,14 @@ func setupgui() {
 	)
 
 	NPCkeep = widget.NewButton("Keep", func() {
-		c := cropImage(DrawCard)
-		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+		deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+		deckbackimage.SetMinSize(fyne.NewSize(100, 100))
+		deckbackimage.FillMode = canvas.ImageFillContain
+		NPCCards.Add(deckbackimage)
+		///c := cropImage(DrawCard)
+		//c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 		//c.SetMinSize(fyne.NewSize(100, 100))
-		NPCCards.Add(c)
+		//NPCCards.Add(c)
 
 	})
 	NPCdiscard = widget.NewButton("Discard", func() {
@@ -336,9 +344,10 @@ func setupgui() {
 	Playerkeep = widget.NewButton("Keep", func() {
 		LastAction = "KEEP"
 		c := cropImage(DrawCard)
-		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
-		c.SetMinSize(fyne.NewSize(100, 100))
+		c.FillMode = canvas.ImageFill(canvas.ImageFillContain)
+		c.SetMinSize(fyne.NewSize(50, 100))
 		PlayerCards.Add(c)
+		log.Println("playerkeep", PlayerCards.MinSize())
 		Turn(Buttonkeep)
 
 	})
@@ -367,12 +376,15 @@ func setupgui() {
 	Playerregularnil.Disable()
 	Playerbid.Disable()
 
-	//PlayerCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
-	//PlayerCards = container.New(PlayerCardsLayout)
+	//CardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
+	//PlayerCards = container.New(CardsLayout)
 
-	PlayerCards = container.NewGridWithColumns(13)
+	//PlayerCards = container.NewGridWithColumns(13)
+	PlayerCards = container.NewHBox()
+	log.Println("setup player", PlayerCards.MinSize())
 
-	NPCCards = container.NewGridWithColumns(13)
+	//NPCCards = container.NewGridWithColumns(13)
+	NPCCards = container.NewHBox()
 
 	//NPCCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
 	//NPCCards = container.New(NPCCardsLayout)
