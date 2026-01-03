@@ -163,6 +163,8 @@ func Turn(button int) {
 			HandleCard()
 			TurnCount = 0
 			PlayerTurn = "PLAYER"
+			Playerkeep.Enable()
+			Playerdiscard.Enable()
 		}
 		/* 		if PlayerTurn == "NPC" {
 
@@ -223,6 +225,7 @@ var Playerkeep *widget.Button
 var Playerdiscard *widget.Button
 var Playerblindnil *widget.Button
 var Playerregularnil *widget.Button
+var Playerbidname *canvas.Text
 var Playerbid *widget.Button
 var NPCkeep *widget.Button
 var NPCdiscard *widget.Button
@@ -246,8 +249,8 @@ func setupgui() {
 	playerbidscorelabel.TextSize = 32
 	playerbidtrickslabel := canvas.NewText("Tricks:", labelcolor)
 	playerbidtrickslabel.TextSize = 32
-	playerbidname := canvas.NewText(config.PlayerName, tc.White)
-	playerbidname.TextSize = 32
+	Playerbidname = canvas.NewText(config.PlayerName, tc.White)
+	Playerbidname.TextSize = 32
 	PlayerBid = canvas.NewText("0", tc.White)
 	PlayerBid.TextSize = 32
 	PlayerBags = canvas.NewText("0", tc.White)
@@ -257,7 +260,7 @@ func setupgui() {
 	PlayerTricks = canvas.NewText("0", tc.White)
 	PlayerTricks.TextSize = 32
 	PlayerScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
-		playerbidname,
+		Playerbidname,
 		playerbidlabel,
 		PlayerBid,
 		playerbidbagslabel,
@@ -409,14 +412,6 @@ func deal() {
 
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
 
-	//card := getcards.NewEmbeddedResource(config.DeckBack)
-	//cropImage(strings.ToLower(config.DeckBack) + "_back.png")
-	//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource("AS.png"))
-	//deckbackimage := cropImage(strings.ToLower(config.DeckBack) + "_back.png")
-
-	//PlayerCards.Add(deckbackimage)
-	//NPCCards.Add(deckbackimage)
-
 	MyDeck = NewDeck()
 	MyDeck.Shuffle()
 
@@ -425,9 +420,7 @@ func deal() {
 	log.Println(Gameplayer.hand, NPCplayer.hand)
 
 	HandleCard()
-	// NEW LAYOUT
 
-	//DeckCard.Add(deckbackimage)
 	DrawnCard := container.NewCenter()
 	DrawnCard.Add(&Mycardimage)
 
@@ -520,6 +513,7 @@ func main() {
 	if iconerr != nil {
 		log.Println("icon.png error ", iconerr.Error())
 	}
+	config.PlayerName = config.FyneApp.Preferences().StringWithFallback("Player", "Player1")
 	setupgui()
 	runtime.GC()
 	runtime.ReadMemStats(&memoryStats)
