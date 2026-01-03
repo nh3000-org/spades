@@ -33,19 +33,6 @@ var NPCGame config.PS
 var memoryStats runtime.MemStats
 var spadesheader *canvas.Image
 
-func discard(player bool) {
-
-}
-func keep(player bool) {
-
-}
-func pick(player bool) {
-
-}
-
-func hand(player bool) {
-
-}
 func cropImage(c string) *canvas.Image {
 	log.Println("cropImage ", c)
 	back := getcards.NewEmbeddedResource(c)
@@ -388,24 +375,34 @@ func setupgui() {
 
 	//NPCCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
 	//NPCCards = container.New(NPCCardsLayout)
-
-	DeckCard = container.NewCenter()
+	DeckBackImage = canvas.NewImageFromResource(getcards.NewEmbeddedResource("green_back.png"))
+	DeckBackImage.SetMinSize(fyne.NewSize(50, 50))
+	DeckBackImage.FillMode = canvas.ImageFillContain
+	CenterDeck := container.NewGridWithColumns(2)
+	CenterDeck.Add(DeckBackImage)
 	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
 	CardsLeft.TextSize = 32
+	CenterDeck.Add(CardsLeft)
+	//DeckCard = container.NewCenter()
+
 	DrawnCard := container.NewCenter()
 	DrawnCard.Add(&Mycardimage)
 	GameBoard = *container.NewVBox()
 	GameBoard.Add(NPCScoreBar)
 	GameBoard.Add(NPCbidbar)
 	GameBoard.Add(NPCCards)
-	GameBoard.Add(DeckCard)
-	GameBoard.Add(CardsLeft)
+	GameBoard.Add(CenterDeck)
+	//GameBoard.Add(DeckCard)
+	//GameBoard.Add(CardsLeft)
 	GameBoard.Add(DrawnCard)
 	GameBoard.Add(PlayerCards)
 
 	GameBoard.Add(Playerbidbar)
 	GameBoard.Add(PlayerScoreBar)
 }
+
+var DeckBackImage *canvas.Image
+
 func deal() {
 	runtime.GC()
 	runtime.ReadMemStats(&memoryStats)
@@ -416,9 +413,6 @@ func deal() {
 	//cropImage(strings.ToLower(config.DeckBack) + "_back.png")
 	//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource("AS.png"))
 	//deckbackimage := cropImage(strings.ToLower(config.DeckBack) + "_back.png")
-	deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(strings.ToLower(config.DeckBack) + "_back.png"))
-	deckbackimage.SetMinSize(fyne.NewSize(100, 100))
-	deckbackimage.FillMode = canvas.ImageFillContain
 
 	//PlayerCards.Add(deckbackimage)
 	//NPCCards.Add(deckbackimage)
@@ -429,42 +423,14 @@ func deal() {
 	Gameplayer = Player{deck: &MyDeck}
 	NPCplayer = Player{deck: &MyDeck}
 	log.Println(Gameplayer.hand, NPCplayer.hand)
-	/* 	dc, dcerr := d.Draw()
-	   	if dcerr != nil {
-	   		log.Println("draw card ", dcerr)
-	   	}
-	   	log.Println("draw card ", dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), gplayer.hand)
-	   	DrawRank = dc.Rank.String()
-	   	DrawSuit = dc.Suit.String()
-	   	DrawCard = DrawRank + DrawSuit + ".png"
-	   	/// make 52 image + deckback as separate the dislay
-	   	// this how to refresh image
-	   	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
-	   	mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-	   	mycardimage.SetMinSize(fyne.NewSize(100, 100))
-	   	mycardimage.FillMode = canvas.ImageFillContain
-	   	mycardimage.Refresh()
-	   	mycardimage.Show()
 
-	   	PlayerCards.Add(mycardimage) */
-	//NPCCards.Add(deckbackimage)
 	HandleCard()
 	// NEW LAYOUT
 
-	DeckCard.Add(deckbackimage)
+	//DeckCard.Add(deckbackimage)
 	DrawnCard := container.NewCenter()
 	DrawnCard.Add(&Mycardimage)
-	/* 	GameBoard = *container.NewVBox()
-	   	GameBoard.Add(NPCScoreBar)
-	   	GameBoard.Add(NPCbidbar)
-	   	GameBoard.Add(NPCCards)
-	   	GameBoard.Add(DeckCard)
-	   	GameBoard.Add(CardsLeft)
-	   	GameBoard.Add(DrawnCard)
-	   	GameBoard.Add(PlayerCards)
 
-	   	GameBoard.Add(Playerbidbar)
-	   	GameBoard.Add(PlayerScoreBar) */
 	config.FyneMainWin.SetContent(&GameBoard)
 
 }
@@ -497,6 +463,9 @@ func splash() {
 	deckbacklabel := widget.NewLabel(config.GetLangs("deckback"))
 	deckback := widget.NewRadioGroup([]string{"Red", "Yellow", "Purple", "Grey", "Green"}, func(string) {})
 	deckback.SetSelected(config.DeckBack)
+	DeckBackImage = canvas.NewImageFromResource(getcards.NewEmbeddedResource(strings.ToLower(config.DeckBack) + "_back.png"))
+	DeckBackImage.SetMinSize(fyne.NewSize(50, 50))
+	DeckBackImage.FillMode = canvas.ImageFillContain
 	deckback.Horizontal = false
 
 	rightbox := container.NewVBox(
