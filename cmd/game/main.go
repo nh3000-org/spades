@@ -186,9 +186,19 @@ func Turn(button int) {
 }
 
 var Mycardimage canvas.Image
+var left int
 
 func HandleCard() {
-
+	left = len(MyDeck)
+	if left == 0 {
+		Playerkeep.Disable()
+		Playerdiscard.Disable()
+		Playerregularnil.Enable()
+		Playerbid.Enable()
+		Mycardimage.Hide()
+		CenterDeck.Hide()
+		return
+	}
 	dc, dcerr := MyDeck.Draw()
 	if dcerr != nil {
 		log.Println("draw card ", dcerr)
@@ -214,6 +224,7 @@ func HandleCard() {
 }
 
 var GameBoard fyne.Container
+var CenterDeck *fyne.Container
 var LastAction = ""
 var MyDeck = NewDeck()
 var Gameplayer = Player{}
@@ -381,7 +392,7 @@ func setupgui() {
 	DeckBackImage = canvas.NewImageFromResource(getcards.NewEmbeddedResource("green_back.png"))
 	DeckBackImage.SetMinSize(fyne.NewSize(50, 50))
 	DeckBackImage.FillMode = canvas.ImageFillContain
-	CenterDeck := container.NewGridWithColumns(2)
+	CenterDeck = container.NewGridWithColumns(2)
 	CenterDeck.Add(DeckBackImage)
 	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
 	CardsLeft.TextSize = 32
