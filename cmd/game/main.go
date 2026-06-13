@@ -17,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+
 	"fyne.io/fyne/v2/widget"
 	"github.com/nh3000-org/spades/config"
 	getcards "github.com/nh3000-org/spades/config/cards"
@@ -27,11 +28,61 @@ type Player struct {
 	hand Cards
 }
 
-var PlayerGame config.PS
-var NPCGame config.PS
+var (
+	PlayerGame config.PS
+	NPCGame    config.PS
 
-var memoryStats runtime.MemStats
-var spadesheader *canvas.Image
+	memoryStats    runtime.MemStats
+	spadesheader   *canvas.Image
+	CardsLeft      *canvas.Text
+	PlayerBid      *canvas.Text
+	PlayerBags     *canvas.Text
+	PlayerScore    *canvas.Text
+	PlayerTricks   *canvas.Text
+	PlayerScoreBar *fyne.Container
+	NPCBid         *canvas.Text
+	NPCBags        *canvas.Text
+	NPCScore       *canvas.Text
+	NPCTricks      *canvas.Text
+	NPCScoreBar    *fyne.Container
+
+	PlayerCards      *fyne.Container
+	NPCCards         *fyne.Container
+	PlayerTurn       = "PLAYER"
+	TurnCount        int // 1 is first turn // 2 is second trun
+	Buttonkeep       = 1
+	Buttondiscard    = 2
+	Buttonblindnil   = 3
+	Buttonregularnil = 4
+	done             = false
+	Mycardimage      canvas.Image
+	left             int
+
+	GameBoard        fyne.Container
+	CenterDeck       *fyne.Container
+	LastAction       = ""
+	MyDeck           = NewDeck()
+	Gameplayer       = Player{}
+	NPCplayer        = Player{}
+	DrawCard         string
+	DrawRank         string
+	DrawSuit         string
+	Playerkeep       *widget.Button
+	Playerdiscard    *widget.Button
+	Playerblindnil   *widget.Button
+	Playerregularnil *widget.Button
+	Playerbidname    *canvas.Text
+	Playerbid        *widget.Button
+	NPCkeep          *widget.Button
+	NPCdiscard       *widget.Button
+	NPCblindnil      *widget.Button
+	NPCregularnil    *widget.Button
+
+	// var NPCbid *widget.Button
+	NPCbidbar    *fyne.Container
+	Playerbidbar *fyne.Container
+	DeckCard     *fyne.Container
+)
 
 func cropImage(c string) *canvas.Image {
 	log.Println("cropImage ", c)
@@ -66,29 +117,6 @@ func cropImage(c string) *canvas.Image {
 	cardimg.SetMinSize(fyne.NewSize(100, 300))
 	return cardimg
 }
-
-var CardsLeft *canvas.Text
-var PlayerBid *canvas.Text
-var PlayerBags *canvas.Text
-var PlayerScore *canvas.Text
-var PlayerTricks *canvas.Text
-var PlayerScoreBar *fyne.Container
-var NPCBid *canvas.Text
-var NPCBags *canvas.Text
-var NPCScore *canvas.Text
-var NPCTricks *canvas.Text
-var NPCScoreBar *fyne.Container
-
-var PlayerCards *fyne.Container
-var NPCCards *fyne.Container
-
-var PlayerTurn = "PLAYER"
-var TurnCount int // 1 is first turn // 2 is second trun
-var Buttonkeep = 1
-var Buttondiscard = 2
-var Buttonblindnil = 3
-var Buttonregularnil = 4
-var done = false
 
 func Turn(button int) {
 
@@ -185,9 +213,6 @@ func Turn(button int) {
 
 }
 
-var Mycardimage canvas.Image
-var left int
-
 func HandleCard() {
 	left = len(MyDeck)
 	if left == 0 {
@@ -222,31 +247,6 @@ func HandleCard() {
 	Mycardimage.Show()
 
 }
-
-var GameBoard fyne.Container
-var CenterDeck *fyne.Container
-var LastAction = ""
-var MyDeck = NewDeck()
-var Gameplayer = Player{}
-var NPCplayer = Player{}
-var DrawCard string
-var DrawRank string
-var DrawSuit string
-var Playerkeep *widget.Button
-var Playerdiscard *widget.Button
-var Playerblindnil *widget.Button
-var Playerregularnil *widget.Button
-var Playerbidname *canvas.Text
-var Playerbid *widget.Button
-var NPCkeep *widget.Button
-var NPCdiscard *widget.Button
-var NPCblindnil *widget.Button
-var NPCregularnil *widget.Button
-
-// var NPCbid *widget.Button
-var NPCbidbar *fyne.Container
-var Playerbidbar *fyne.Container
-var DeckCard *fyne.Container
 
 // create and instantiate all gui elements
 // update gui as needed
@@ -503,6 +503,7 @@ func splash() {
 	config.FyneMainWin.SetContent(border)
 
 }
+
 func main() {
 	a := app.NewWithID("org.nh3000.spades")
 	config.FyneApp = a
@@ -519,7 +520,7 @@ func main() {
 		config.PreferedLanguage = "hin"
 	}
 	config.Selected = config.Game
-	config.FyneApp.Settings().SetTheme(config.MyTheme{})
+	config.FyneApp.Settings().SetTheme(&config.MyTheme{})
 	MyLogo, iconerr := fyne.LoadResourceFromPath("icon.png")
 	if iconerr != nil {
 		log.Println("icon.png error ", iconerr.Error())
