@@ -394,7 +394,7 @@ func (m MyTheme) Font(style fyne.TextStyle) fyne.Resource {
 }
 
 func (m MyTheme) Size(name fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(name)
+	return theme.DefaultTheme().Size(name) * 1.5
 }
 func (m MyTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	//if name == theme.IconNameHome {

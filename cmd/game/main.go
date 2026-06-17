@@ -485,7 +485,7 @@ func splash() {
 	)
 
 	next := widget.NewButton("Next", func() {
-
+		config.FyneApp.Preferences().SetString("Scale", "150")
 		config.FyneApp.Preferences().SetString("Player", player.Text)
 		config.PlayerName = player.Text
 		config.FyneApp.Preferences().SetString("Difficulty", difficulty.Selected)
@@ -505,10 +505,12 @@ func splash() {
 }
 
 func main() {
+
 	a := app.NewWithID("org.nh3000.spades")
 	config.FyneApp = a
 	var w = a.NewWindow("Spades 4 Two")
 	config.FyneMainWin = w
+
 	config.PreferedLanguage = "eng"
 	if strings.HasPrefix(os.Getenv("LANG"), "en") {
 		config.PreferedLanguage = "eng"
@@ -520,6 +522,7 @@ func main() {
 		config.PreferedLanguage = "hin"
 	}
 	config.Selected = config.Game
+
 	config.FyneApp.Settings().SetTheme(&config.MyTheme{})
 	MyLogo, iconerr := fyne.LoadResourceFromPath("icon.png")
 	if iconerr != nil {
@@ -531,7 +534,7 @@ func main() {
 	runtime.ReadMemStats(&memoryStats)
 	config.FyneApp.SetIcon(MyLogo)
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
-	config.FyneMainWin.Resize(fyne.NewSize(640, 480))
+	config.FyneMainWin.Resize(fyne.NewSize(1024, 800))
 	splash()
 	config.FyneMainWin.ShowAndRun()
 }
