@@ -451,6 +451,12 @@ func splash() {
 	rules := widget.NewMultiLineEntry()
 	rules.SetText(config.GetLangs("rules"))
 
+	config.Fyne_scale = config.FyneApp.Preferences().StringWithFallback("Fyne_scale", "1.5")
+	fslabel := widget.NewLabel(config.GetLangs("scale"))
+	fs := widget.NewEntry()
+	fs.SetText(config.Fyne_scale)
+	fs.SetPlaceHolder(config.GetLangs("scale"))
+
 	config.PlayerName = config.FyneApp.Preferences().StringWithFallback("Player", "Player1")
 	playerlabel := widget.NewLabel(config.GetLangs("player"))
 	player := widget.NewEntry()
@@ -474,6 +480,10 @@ func splash() {
 
 	rightbox := container.NewVBox(
 		widget.NewLabelWithStyle(config.GetLangs("preferences"), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+
+		fslabel,
+		fs,
+
 		playerlabel,
 		player,
 

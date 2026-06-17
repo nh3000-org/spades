@@ -3,6 +3,7 @@ package config
 import (
 	"image/color"
 	"log"
+	"strconv"
 
 	//"strconv"
 
@@ -394,7 +395,12 @@ func (m MyTheme) Font(style fyne.TextStyle) fyne.Resource {
 }
 
 func (m MyTheme) Size(name fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(name) * 1.5
+	fs, fserr := strconv.ParseFloat(Fyne_scale, 32)
+	if fserr == nil {
+		fs = 1.0
+	}
+
+	return theme.DefaultTheme().Size(name) * float32(fs)
 }
 func (m MyTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	//if name == theme.IconNameHome {

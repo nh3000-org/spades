@@ -11,6 +11,7 @@ import (
 
 var FyneApp fyne.App
 var FyneMainWin fyne.Window
+var Fyne_scale string = "1.5"
 var PlayerName string
 var DealerPlayer bool
 var Difficulty string
