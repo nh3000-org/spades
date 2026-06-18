@@ -495,7 +495,17 @@ func splash() {
 	)
 
 	next := widget.NewButton("Next", func() {
-		config.FyneApp.Preferences().SetString("Scale", "150")
+		fscheck, err := strconv.ParseFloat(fs.Text, 64)
+		if err != nil {
+			log.Println("Invalid scale value")
+			fs.SetText("1.0")
+		}
+		if fscheck < 1.0 || fscheck > 2.0 {
+			log.Println("Scale value must be between 0.5 and 2.0")
+			fs.SetText("1.0")
+		}
+
+		config.FyneApp.Preferences().SetString("Fyne_scale", fs.Text)
 		config.FyneApp.Preferences().SetString("Player", player.Text)
 		config.PlayerName = player.Text
 		config.FyneApp.Preferences().SetString("Difficulty", difficulty.Selected)
@@ -509,9 +519,10 @@ func splash() {
 		deal()
 
 	})
+
 	border := container.NewBorder(spadesheader, next, nil, rightbox, rules)
 	config.FyneMainWin.SetContent(border)
-
+	//config.FyneMainWin.Canvas().Refresh(border)
 }
 
 func main() {

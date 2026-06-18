@@ -396,8 +396,9 @@ func (m MyTheme) Font(style fyne.TextStyle) fyne.Resource {
 
 func (m MyTheme) Size(name fyne.ThemeSizeName) float32 {
 	fs, fserr := strconv.ParseFloat(Fyne_scale, 32)
-	if fserr == nil {
+	if fserr != nil {
 		fs = 1.0
+		log.Println("nhtheme Size", fserr)
 	}
 
 	return theme.DefaultTheme().Size(name) * float32(fs)
