@@ -48,6 +48,7 @@ var (
 
 	PlayerCards      *fyne.Container
 	NPCCards         *fyne.Container
+	PlayerMap	map
 	PlayerTurn       = "PLAYER"
 	TurnCount        int // 1 is first turn // 2 is second trun
 	Buttonkeep       = 1
@@ -321,6 +322,7 @@ func setupgui() {
 		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 		c.SetMinSize(fyne.NewSize(50, 100))
 		NPCCards.Add(c)
+		NPCCards.Refresh()
 
 	})
 	NPCdiscard = widget.NewButton("Discard", func() {
@@ -348,6 +350,7 @@ func setupgui() {
 		c.FillMode = canvas.ImageFill(canvas.ImageFillContain)
 		c.SetMinSize(fyne.NewSize(50, 100))
 		PlayerCards.Add(c)
+		PlayerCards.Refresh()
 		log.Println("playerkeep", PlayerCards.MinSize())
 		Turn(Buttonkeep)
 
