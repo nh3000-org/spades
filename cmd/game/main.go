@@ -233,8 +233,7 @@ func HandleCard() {
 	if dcerr != nil {
 		log.Println("draw card ", dcerr)
 	}
-	//CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
-	//CardsLeft.TextSize = 32
+
 	CardsLeft.Text = strconv.Itoa(len(MyDeck))
 
 	log.Println("draw card ", strconv.Itoa(len(MyDeck)), dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
@@ -245,11 +244,9 @@ func HandleCard() {
 
 	log.Println("draw card sort", DrawCardSort)
 
-	/// make 52 image + deckback as separate the dislay
-	// this how to refresh image
-	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
+
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
-	//mycardimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
+
 	Mycardimage.SetMinSize(fyne.NewSize(100, 200))
 	Mycardimage.FillMode = canvas.ImageFillContain
 	Mycardimage.Refresh()
