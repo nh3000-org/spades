@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"image"
+	"sort"
 	"strconv"
 
 	tc "image/color"
@@ -48,7 +49,8 @@ var (
 
 	PlayerCards      *fyne.Container
 	NPCCards         *fyne.Container
-	PlayerMap	map
+	PlayerCardsList  []string
+	NPCCardsList     []string
 	PlayerTurn       = "PLAYER"
 	TurnCount        int // 1 is first turn // 2 is second trun
 	Buttonkeep       = 1
@@ -59,15 +61,17 @@ var (
 	Mycardimage      canvas.Image
 	left             int
 
-	GameBoard        fyne.Container
-	CenterDeck       *fyne.Container
-	LastAction       = ""
-	MyDeck           = NewDeck()
-	Gameplayer       = Player{}
-	NPCplayer        = Player{}
-	DrawCard         string
-	DrawRank         string
-	DrawSuit         string
+	GameBoard    fyne.Container
+	CenterDeck   *fyne.Container
+	LastAction   = ""
+	MyDeck       = NewDeck()
+	Gameplayer   = Player{}
+	NPCplayer    = Player{}
+	DrawCard     string
+	DrawCardSort string
+	DrawRank     string
+	DrawSuit     string
+
 	Playerkeep       *widget.Button
 	Playerdiscard    *widget.Button
 	Playerblindnil   *widget.Button
@@ -237,6 +241,10 @@ func HandleCard() {
 	DrawRank = dc.Rank.String()
 	DrawSuit = dc.Suit.String()
 	DrawCard = DrawRank + DrawSuit + ".png"
+	DrawCardSort = DrawSuit + DrawRank + ":" + DrawRank + DrawSuit + ".png"
+
+	log.Println("draw card sort", DrawCardSort)
+
 	/// make 52 image + deckback as separate the dislay
 	// this how to refresh image
 	//mycardimage.Resource = getcards.NewEmbeddedResource(mycard)
@@ -318,10 +326,19 @@ func setupgui() {
 		//deckbackimage.SetMinSize(fyne.NewSize(100, 100))
 		//deckbackimage.FillMode = canvas.ImageFillContain
 		//NPCCards.Add(deckbackimage)
-		c := cropImage(DrawCard)
-		c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
-		c.SetMinSize(fyne.NewSize(50, 100))
-		NPCCards.Add(c)
+
+		NPCCardsList = append(NPCCardsList, DrawCardSort)
+		sort.Strings(NPCCardsList)
+		NPCCards.RemoveAll()
+		for _, card := range NPCCardsList {
+
+			s := strings.Split(card, ":")
+			c := cropImage(s[1])
+			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+			c.SetMinSize(fyne.NewSize(50, 100))
+			NPCCards.Add(c)
+		}
+
 		NPCCards.Refresh()
 
 	})
@@ -346,10 +363,18 @@ func setupgui() {
 
 	Playerkeep = widget.NewButton("Keep", func() {
 		LastAction = "KEEP"
-		c := cropImage(DrawCard)
-		c.FillMode = canvas.ImageFill(canvas.ImageFillContain)
-		c.SetMinSize(fyne.NewSize(50, 100))
-		PlayerCards.Add(c)
+
+		PlayerCardsList = append(PlayerCardsList, DrawCardSort)
+		log.Println(DrawCard)
+		sort.Strings(PlayerCardsList)
+		PlayerCards.RemoveAll()
+		for _, card := range PlayerCardsList {
+			s := strings.Split(card, ":")
+			c := cropImage(s[1])
+			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+			c.SetMinSize(fyne.NewSize(50, 100))
+			PlayerCards.Add(c)
+		}
 		PlayerCards.Refresh()
 		log.Println("playerkeep", PlayerCards.MinSize())
 		Turn(Buttonkeep)
