@@ -29,28 +29,40 @@ type Player struct {
 	hand Cards
 }
 
+var PS Game
+var NPC Game
+
+type Game struct {
+	Stats         config.PS
+	Left          *canvas.Text
+	Bid           *canvas.Text
+	Bags          *canvas.Text
+	Score         *canvas.Text
+	Tricks        *canvas.Text
+	ScoreBar      *fyne.Container
+	Cards         *fyne.Container
+	CardList      []string
+	Bidlabel      *canvas.Text
+	Bidbagslabel  *canvas.Text
+	Bidscorelabel *canvas.Text
+
+	Bidtrickslabel *canvas.Text
+
+	ButtonKeep       *widget.Button
+	ButtonDiscard    *widget.Button
+	ButtonBlindnil   *widget.Button
+	ButtonRegularnil *widget.Button
+	Bidname          *canvas.Text
+	ButtonBid        *widget.Button
+	Bidbar           *fyne.Container
+}
+
 var (
-	PlayerGame config.PS
-	NPCGame    config.PS
-
-	memoryStats    runtime.MemStats
-	spadesheader   *canvas.Image
-	CardsLeft      *canvas.Text
-	PlayerBid      *canvas.Text
-	PlayerBags     *canvas.Text
-	PlayerScore    *canvas.Text
-	PlayerTricks   *canvas.Text
-	PlayerScoreBar *fyne.Container
-	NPCBid         *canvas.Text
-	NPCBags        *canvas.Text
-	NPCScore       *canvas.Text
-	NPCTricks      *canvas.Text
-	NPCScoreBar    *fyne.Container
-
-	PlayerCards      *fyne.Container
-	NPCCards         *fyne.Container
-	PlayerCardsList  []string
-	NPCCardsList     []string
+	PlayerGame       config.PS
+	NPCGame          config.PS
+	memoryStats      runtime.MemStats
+	spadesheader     *canvas.Image
+	CardsLeft        *canvas.Text
 	PlayerTurn       = "PLAYER"
 	TurnCount        int // 1 is first turn // 2 is second trun
 	Buttonkeep       = 1
@@ -72,21 +84,8 @@ var (
 	DrawRank     string
 	DrawSuit     string
 
-	Playerkeep       *widget.Button
-	Playerdiscard    *widget.Button
-	Playerblindnil   *widget.Button
-	Playerregularnil *widget.Button
-	Playerbidname    *canvas.Text
-	Playerbid        *widget.Button
-	NPCkeep          *widget.Button
-	NPCdiscard       *widget.Button
-	NPCblindnil      *widget.Button
-	NPCregularnil    *widget.Button
-
-	// var NPCbid *widget.Button
-	NPCbidbar    *fyne.Container
-	Playerbidbar *fyne.Container
-	DeckCard     *fyne.Container
+	DeckCard *fyne.Container
+	Playarea = container.NewCenter()
 )
 
 func cropImage(c string) *canvas.Image {
@@ -145,21 +144,21 @@ func Turn(button int) {
 	if TurnCount == 1 {
 		// player
 		if PlayerTurn == "PLAYER" {
-			Playerkeep.Enable()
-			Playerdiscard.Enable()
+			PS.ButtonKeep.Enable()
+			PS.ButtonDiscard.Enable()
 			if button == Buttonkeep {
-				Playerkeep.Disable()
-				Playerdiscard.Enable()
-				Playerblindnil.Disable()
-				Playerregularnil.Disable()
-				Playerbid.Disable()
+				PS.ButtonKeep.Disable()
+				PS.ButtonDiscard.Enable()
+				PS.ButtonBlindnil.Disable()
+				PS.ButtonRegularnil.Disable()
+				PS.ButtonBid.Disable()
 			}
 			if button == Buttondiscard {
-				Playerkeep.Enable()
-				Playerdiscard.Disable()
-				Playerblindnil.Disable()
-				Playerregularnil.Disable()
-				Playerbid.Disable()
+				PS.ButtonKeep.Enable()
+				PS.ButtonDiscard.Disable()
+				PS.ButtonBlindnil.Disable()
+				PS.ButtonRegularnil.Disable()
+				PS.ButtonBid.Disable()
 			}
 			HandleCard()
 		}
@@ -184,35 +183,21 @@ func Turn(button int) {
 			}
 			HandleCard()
 
-			NPCkeep.Enable()
-			NPCdiscard.Disable()
-			NPCblindnil.Disable()
-			NPCregularnil.Disable()
+			NPC.ButtonKeep.Enable()
+			NPC.ButtonDiscard.Disable()
+			NPC.ButtonBlindnil.Disable()
+			NPC.ButtonRegularnil.Disable()
 			//NPCBid.Disable()
-			NPCkeep.Tapped(nil)
+			NPC.ButtonKeep.Tapped(nil)
 			HandleCard()
-			NPCdiscard.Tapped(nil)
+			NPC.ButtonDiscard.Tapped(nil)
 
 			HandleCard()
 			TurnCount = 0
 			PlayerTurn = "PLAYER"
-			Playerkeep.Enable()
-			Playerdiscard.Enable()
+			PS.ButtonKeep.Enable()
+			PS.ButtonDiscard.Enable()
 		}
-		/* 		if PlayerTurn == "NPC" {
-
-			NPCkeep.Enable()
-			NPCdiscard.Disable()
-			NPCblindnil.Disable()
-			NPCregularnil.Disable()
-			//NPCBid.Disable()
-			NPCkeep.Tapped(nil)
-			HandleCard()
-			NPCdiscard.Tapped(nil)
-
-			HandleCard()
-			TurnCount = 1
-		} */
 
 	}
 
@@ -221,10 +206,11 @@ func Turn(button int) {
 func HandleCard() {
 	left = len(MyDeck)
 	if left == 0 {
-		Playerkeep.Disable()
-		Playerdiscard.Disable()
-		Playerregularnil.Enable()
-		Playerbid.Enable()
+		PS.ButtonKeep.Disable()
+		PS.ButtonDiscard.Disable()
+		PS.ButtonBlindnil.Enable()
+		PS.ButtonRegularnil.Enable()
+		PS.ButtonBid.Enable()
 		Mycardimage.Hide()
 		CenterDeck.Hide()
 		return
@@ -244,7 +230,6 @@ func HandleCard() {
 
 	log.Println("draw card sort", DrawCardSort)
 
-
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
 
 	Mycardimage.SetMinSize(fyne.NewSize(100, 200))
@@ -256,161 +241,210 @@ func HandleCard() {
 
 // create and instantiate all gui elements
 // update gui as needed
+
 func setupgui() {
 	labelcolor := tc.RGBA{253, 118, 87, 255}
-	playerbidlabel := canvas.NewText("Bid:", labelcolor)
-	playerbidlabel.TextSize = 32
-	playerbidbagslabel := canvas.NewText("Bags:", labelcolor)
-	playerbidbagslabel.TextSize = 32
-	playerbidscorelabel := canvas.NewText("Score:", labelcolor)
-	playerbidscorelabel.TextSize = 32
-	playerbidtrickslabel := canvas.NewText("Tricks:", labelcolor)
-	playerbidtrickslabel.TextSize = 32
-	Playerbidname = canvas.NewText(config.PlayerName, tc.White)
-	Playerbidname.TextSize = 32
-	PlayerBid = canvas.NewText("0", tc.White)
-	PlayerBid.TextSize = 32
-	PlayerBags = canvas.NewText("0", tc.White)
-	PlayerBags.TextSize = 32
-	PlayerScore = canvas.NewText("0", tc.White)
-	PlayerScore.TextSize = 32
-	PlayerTricks = canvas.NewText("0", tc.White)
-	PlayerTricks.TextSize = 32
-	PlayerScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
-		Playerbidname,
-		playerbidlabel,
-		PlayerBid,
-		playerbidbagslabel,
-		PlayerBags,
-		playerbidscorelabel,
-		PlayerScore,
-		playerbidtrickslabel,
-		PlayerTricks,
+	PS = Game{}
+	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
+	PS.Bidlabel.TextSize = 32
+	PS.Bidbagslabel = canvas.NewText("Bags:", labelcolor)
+	PS.Bidbagslabel.TextSize = 32
+	PS.Bidscorelabel = canvas.NewText("Score:", labelcolor)
+	PS.Bidscorelabel.TextSize = 32
+	PS.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
+	PS.Bidtrickslabel.TextSize = 32
+	PS.Bidname = canvas.NewText(config.PlayerName, tc.White)
+	PS.Bidname.TextSize = 32
+	PS.Bid = canvas.NewText("0", tc.White)
+	PS.Bid.TextSize = 32
+	PS.Bags = canvas.NewText("0", tc.White)
+	PS.Bags.TextSize = 32
+	PS.Score = canvas.NewText("0", tc.White)
+	PS.Score.TextSize = 32
+	PS.Tricks = canvas.NewText("0", tc.White)
+	PS.Tricks.TextSize = 32
+	PS.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+		PS.Bidname,
+		PS.Bidlabel,
+		PS.Bid,
+		PS.Bidbagslabel,
+		PS.Bags,
+		PS.Bidscorelabel,
+		PS.Score,
+		PS.Bidtrickslabel,
+		PS.Tricks,
 	)
-	// npc
-	npcbidlabel := canvas.NewText("Bid:", labelcolor)
-	npcbidlabel.TextSize = 32
-	npcbidbagslabel := canvas.NewText("Bags:", labelcolor)
-	npcbidbagslabel.TextSize = 32
-	npcbidscorelabel := canvas.NewText("Score:", labelcolor)
-	npcbidscorelabel.TextSize = 32
-	npcbidtrickslabel := canvas.NewText("Tricks:", labelcolor)
-	npcbidtrickslabel.TextSize = 32
-	npcbidname := canvas.NewText("NPC", tc.White)
-	npcbidname.TextSize = 32
-	NPCBid = canvas.NewText("0", tc.White)
-	NPCBid.TextSize = 32
-	NPCBags = canvas.NewText("0", tc.White)
-	NPCBags.TextSize = 32
-	NPCScore = canvas.NewText("0", tc.White)
-	NPCScore.TextSize = 32
-	NPCTricks = canvas.NewText("0", tc.White)
-	NPCTricks.TextSize = 32
-	NPCScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
-		npcbidname,
-		npcbidlabel,
-		NPCBid,
-		npcbidbagslabel,
-		NPCBags,
-		npcbidscorelabel,
-		NPCScore,
-		npcbidtrickslabel,
-		NPCTricks,
-	)
+	PS.Cards = container.NewHBox()
 
-	NPCkeep = widget.NewButton("Keep", func() {
+	NPC = Game{}
+	NPC.Bidlabel = canvas.NewText("Bid:", labelcolor)
+	NPC.Bidlabel.TextSize = 32
+	NPC.Bidbagslabel = canvas.NewText("Bags:", labelcolor)
+	NPC.Bidbagslabel.TextSize = 32
+	NPC.Bidscorelabel = canvas.NewText("Score:", labelcolor)
+	NPC.Bidscorelabel.TextSize = 32
+	NPC.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
+	NPC.Bidtrickslabel.TextSize = 32
+	NPC.Bidname = canvas.NewText("NPC", tc.White)
+	NPC.Bidname.TextSize = 32
+	NPC.Bidlabel = canvas.NewText("Bid:", labelcolor)
+	NPC.Bidlabel.TextSize = 32
+	NPC.Bid = canvas.NewText("0", tc.White)
+	NPC.Bid.TextSize = 32
+	NPC.Bags = canvas.NewText("0", tc.White)
+	NPC.Bags.TextSize = 32
+	NPC.Score = canvas.NewText("0", tc.White)
+	NPC.Score.TextSize = 32
+	NPC.Tricks = canvas.NewText("0", tc.White)
+	NPC.Tricks.TextSize = 32
+	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+		NPC.Bidname,
+		NPC.Bidlabel,
+		NPC.Bid,
+		NPC.Bidbagslabel,
+		NPC.Bags,
+		NPC.Bidscorelabel,
+		NPC.Score,
+		NPC.Bidtrickslabel,
+		NPC.Tricks,
+	)
+	NPC.Cards = container.NewHBox()
+	NPC.ButtonKeep = widget.NewButton("Keep", func() {
 		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
 		//deckbackimage.SetMinSize(fyne.NewSize(100, 100))
 		//deckbackimage.FillMode = canvas.ImageFillContain
 		//NPCCards.Add(deckbackimage)
 
-		NPCCardsList = append(NPCCardsList, DrawCardSort)
-		sort.Strings(NPCCardsList)
-		NPCCards.RemoveAll()
-		for _, card := range NPCCardsList {
+		NPC.CardList = append(NPC.CardList, DrawCardSort)
+		sort.Strings(NPC.CardList)
+		NPC.Cards.RemoveAll()
+		for _, card := range NPC.CardList {
 
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 			c.SetMinSize(fyne.NewSize(50, 100))
-			NPCCards.Add(c)
+			NPC.Cards.Add(c)
 		}
 
-		NPCCards.Refresh()
+		NPC.Cards.Refresh()
 
 	})
-	NPCdiscard = widget.NewButton("Discard", func() {
+	NPC.ButtonDiscard = widget.NewButton("Discard", func() {
 
 	})
-	NPCblindnil = widget.NewButton("Blind Nil", func() {
+	NPC.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 
 	})
-	NPCregularnil = widget.NewButton("Nil", func() {
+	NPC.ButtonRegularnil = widget.NewButton("Nil", func() {
 
 	})
-	NPCBid := widget.NewButton("Bid", func() {
+	NPC.ButtonBid = widget.NewButton("Bid", func() {
 
 	})
-	NPCbidbar = container.NewGridWithColumns(5)
-	NPCbidbar.Add(NPCkeep)
-	NPCbidbar.Add(NPCdiscard)
-	NPCbidbar.Add(NPCblindnil)
-	NPCbidbar.Add(NPCregularnil)
-	NPCbidbar.Add(NPCBid)
-
-	Playerkeep = widget.NewButton("Keep", func() {
+	NPC.Bidbar = container.NewGridWithColumns(5)
+	NPC.Bidbar.Add(NPC.ButtonKeep)
+	NPC.Bidbar.Add(NPC.ButtonDiscard)
+	NPC.Bidbar.Add(NPC.ButtonBlindnil)
+	NPC.Bidbar.Add(NPC.ButtonRegularnil)
+	NPC.Bidbar.Add(NPC.ButtonBid)
+	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+		NPC.Bidname,
+		NPC.Bidlabel,
+		NPC.Bid,
+		NPC.Bidbagslabel,
+		NPC.Bags,
+		NPC.Bidscorelabel,
+		NPC.Score,
+		NPC.Bidtrickslabel,
+		NPC.Tricks,
+	)
+	PS = Game{}
+	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
+	PS.Bidlabel.TextSize = 32
+	PS.Bidbagslabel = canvas.NewText("Bags:", labelcolor)
+	PS.Bidbagslabel.TextSize = 32
+	PS.Bidscorelabel = canvas.NewText("Score:", labelcolor)
+	PS.Bidscorelabel.TextSize = 32
+	PS.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
+	PS.Bidtrickslabel.TextSize = 32
+	PS.Bidname = canvas.NewText("PS", tc.White)
+	PS.Bidname.TextSize = 32
+	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
+	PS.Bidlabel.TextSize = 32
+	PS.Bid = canvas.NewText("0", tc.White)
+	PS.Bid.TextSize = 32
+	PS.Bags = canvas.NewText("0", tc.White)
+	PS.Bags.TextSize = 32
+	PS.Score = canvas.NewText("0", tc.White)
+	PS.Score.TextSize = 32
+	PS.Tricks = canvas.NewText("0", tc.White)
+	PS.Tricks.TextSize = 32
+	PS.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+		PS.Bidname,
+		PS.Bidlabel,
+		PS.Bid,
+		PS.Bidbagslabel,
+		PS.Bags,
+		PS.Bidscorelabel,
+		PS.Score,
+		PS.Bidtrickslabel,
+		PS.Tricks,
+	)
+	PS.Cards = container.NewHBox()
+	PS.ButtonKeep = widget.NewButton("Keep", func() {
 		LastAction = "KEEP"
 
-		PlayerCardsList = append(PlayerCardsList, DrawCardSort)
+		PS.CardList = append(PS.CardList, DrawCardSort)
 		log.Println(DrawCard)
-		sort.Strings(PlayerCardsList)
-		PlayerCards.RemoveAll()
-		for _, card := range PlayerCardsList {
+		sort.Strings(PS.CardList)
+		PS.Cards.RemoveAll()
+		for _, card := range PS.CardList {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 			c.SetMinSize(fyne.NewSize(50, 100))
-			PlayerCards.Add(c)
+			PS.Cards.Add(c)
 		}
-		PlayerCards.Refresh()
-		log.Println("playerkeep", PlayerCards.MinSize())
+		PS.Cards.Refresh()
+		log.Println("playerkeep", PS.Cards)
 		Turn(Buttonkeep)
 
 	})
-	Playerdiscard = widget.NewButton("Discard", func() {
+	PS.ButtonDiscard = widget.NewButton("Discard", func() {
 		LastAction = "DISCARD"
 
 		Turn(Buttondiscard)
 	})
-	Playerblindnil = widget.NewButton("Blind Nil", func() {
+	PS.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 
 	})
-	Playerregularnil = widget.NewButton("Nil", func() {
+	PS.ButtonRegularnil = widget.NewButton("Nil", func() {
 
 	})
-	Playerbid = widget.NewButton("Bid", func() {
+	PS.ButtonBid = widget.NewButton("Bid", func() {
 
 	})
-	Playerbid.Disable()
-	Playerbidbar = container.NewGridWithColumns(5)
-	Playerbidbar.Add(Playerkeep)
-	Playerbidbar.Add(Playerdiscard)
-	Playerbidbar.Add(Playerblindnil)
-	Playerbidbar.Add(Playerregularnil)
-	Playerbidbar.Add(Playerbid)
+	PS.ButtonBid.Disable()
+	PS.Bidbar = container.NewGridWithColumns(5)
+	PS.Bidbar.Add(PS.ButtonKeep)
+	PS.Bidbar.Add(PS.ButtonDiscard)
+	PS.Bidbar.Add(PS.ButtonBlindnil)
+	PS.Bidbar.Add(PS.ButtonRegularnil)
+	PS.Bidbar.Add(PS.ButtonBid)
 
-	Playerregularnil.Disable()
-	Playerbid.Disable()
+	PS.ButtonRegularnil.Disable()
+	PS.ButtonBid.Disable()
 
 	//CardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
 	//PlayerCards = container.New(CardsLayout)
 
 	//PlayerCards = container.NewGridWithColumns(13)
-	PlayerCards = container.NewHBox()
-	log.Println("setup player", PlayerCards.MinSize())
+	PS.Cards = container.NewHBox()
+	log.Println("setup player", PS.Cards.MinSize())
 
 	//NPCCards = container.NewGridWithColumns(13)
-	NPCCards = container.NewHBox()
+	//NPCCards = container.NewHBox()
 
 	//NPCCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
 	//NPCCards = container.New(NPCCardsLayout)
@@ -424,20 +458,33 @@ func setupgui() {
 	CenterDeck.Add(CardsLeft)
 	//DeckCard = container.NewCenter()
 
-	DrawnCard := container.NewCenter()
-	DrawnCard.Add(&Mycardimage)
-	GameBoard = *container.NewVBox()
-	GameBoard.Add(NPCScoreBar)
-	GameBoard.Add(NPCbidbar)
-	GameBoard.Add(NPCCards)
-	GameBoard.Add(CenterDeck)
-	//GameBoard.Add(DeckCard)
-	//GameBoard.Add(CardsLeft)
-	GameBoard.Add(DrawnCard)
-	GameBoard.Add(PlayerCards)
+	Playarea.Add(&Mycardimage)
 
-	GameBoard.Add(Playerbidbar)
-	GameBoard.Add(PlayerScoreBar)
+	GameBoard = *container.NewVBox()
+	GameBoard.Add(NPC.ScoreBar)
+	GameBoard.Add(NPC.Bidbar)
+	GameBoard.Add(NPC.Cards)
+	GameBoard.Add(CenterDeck)
+
+	GameBoard.Add(Playarea)
+
+	GameBoard.Add(PS.Cards)
+
+	GameBoard.Add(PS.Bidbar)
+	GameBoard.Add(PS.ScoreBar)
+}
+func play() {
+
+	GameBoard.Add(NPC.ScoreBar)
+	GameBoard.Add(NPC.Bidbar)
+	GameBoard.Add(NPC.Cards)
+	GameBoard.Add(CenterDeck)
+
+	GameBoard.Add(Playarea)
+	GameBoard.Add(PS.Cards)
+
+	GameBoard.Add(PS.Bidbar)
+	GameBoard.Add(PS.ScoreBar)
 }
 
 var DeckBackImage *canvas.Image
@@ -457,8 +504,7 @@ func deal() {
 
 	HandleCard()
 
-	DrawnCard := container.NewCenter()
-	DrawnCard.Add(&Mycardimage)
+	Playarea.Add(&Mycardimage)
 
 	config.FyneMainWin.SetContent(&GameBoard)
 
