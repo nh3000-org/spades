@@ -285,7 +285,7 @@ func setupgui() {
 	NPC.Bidscorelabel.TextSize = 32
 	NPC.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
 	NPC.Bidtrickslabel.TextSize = 32
-	NPC.Bidname = canvas.NewText("NPC", tc.White)
+	NPC.Bidname = canvas.NewText("Computer", tc.White)
 	NPC.Bidname.TextSize = 32
 	NPC.Bidlabel = canvas.NewText("Bid:", labelcolor)
 	NPC.Bidlabel.TextSize = 32
@@ -368,7 +368,7 @@ func setupgui() {
 	PS.Bidscorelabel.TextSize = 32
 	PS.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
 	PS.Bidtrickslabel.TextSize = 32
-	PS.Bidname = canvas.NewText("PS", tc.White)
+	PS.Bidname = canvas.NewText("Human", tc.White)
 	PS.Bidname.TextSize = 32
 	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
 	PS.Bidlabel.TextSize = 32
