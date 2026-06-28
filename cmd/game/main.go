@@ -83,13 +83,13 @@ var (
 	DrawCardSort string
 	DrawRank     string
 	DrawSuit     string
-
-	DeckCard *fyne.Container
-	Playarea = container.NewCenter()
+	SortOrder    string
+	DeckCard     *fyne.Container
+	Playarea     = container.NewCenter()
 )
 
 func cropImage(c string) *canvas.Image {
-	log.Println("cropImage ", c)
+	//log.Println("cropImage ", c)
 	back := getcards.NewEmbeddedResource(c)
 	img, _, err := image.Decode(bytes.NewReader(back.Content()))
 
@@ -217,20 +217,62 @@ func HandleCard() {
 	}
 	dc, dcerr := MyDeck.Draw()
 	if dcerr != nil {
-		log.Println("draw card ", dcerr)
+		log.Println("draw card error", dcerr)
 	}
 
 	CardsLeft.Text = strconv.Itoa(len(MyDeck))
 
-	log.Println("draw card ", strconv.Itoa(len(MyDeck)), dc.Rank, dc.Suit, dc.String(), dc.Rank.String(), dc.Suit.String(), Gameplayer.hand)
+	//log.Println("draw card ", dc.Rank, dc.Suit)
 	DrawRank = dc.Rank.String()
 	DrawSuit = dc.Suit.String()
 	DrawCard = DrawRank + DrawSuit + ".png"
-	DrawCardSort = DrawSuit + DrawRank + ":" + DrawRank + DrawSuit + ".png"
+	SortOrder = ""
+	switch DrawSuit {
+	case "S":
+		SortOrder = "01"
+	case "H":
+		SortOrder = "02"
+	case "C":
+		SortOrder = "03"
+	case "D":
+		SortOrder = "04"
+	}
+	switch DrawRank {
+	case "2":
+		SortOrder = SortOrder + "01"
+	case "3":
+		SortOrder = SortOrder + "02"
+	case "4":
+		SortOrder = SortOrder + "03"
+	case "5":
+		SortOrder = SortOrder + "04"
+	case "6":
+		SortOrder = SortOrder + "05"
+	case "7":
+		SortOrder = SortOrder + "06"
+	case "8":
+		SortOrder = SortOrder + "07"
+	case "9":
+		SortOrder = SortOrder + "08"
+	case "10":
+		SortOrder = SortOrder + "09"
+	case "J":
+		SortOrder = SortOrder + "10"
+	case "Q":
+		SortOrder = SortOrder + "11"
+	case "K":
+		SortOrder = SortOrder + "12"
+	case "A":
+		SortOrder = SortOrder + "13"
+	}
+	//get ranking of ranks
+	DrawCardSort = SortOrder  + ":" + DrawRank + DrawSuit + ".png"
 
-	log.Println("draw card sort", DrawCardSort)
+	log.Println("draw card sort", DrawCardSort,PlayerTurn)
 
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
+
+
 
 	Mycardimage.SetMinSize(fyne.NewSize(100, 200))
 	Mycardimage.FillMode = canvas.ImageFillContain
@@ -407,7 +449,7 @@ func setupgui() {
 			PS.Cards.Add(c)
 		}
 		PS.Cards.Refresh()
-		log.Println("playerkeep", PS.Cards)
+		//log.Println("playerkeep", PS.Cards)
 		Turn(Buttonkeep)
 
 	})
