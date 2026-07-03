@@ -54,6 +54,8 @@ type Game struct {
 	ButtonRegularnil *widget.Button
 	Bidname          *canvas.Text
 	ButtonBid        *widget.Button
+	BidValue         *widget.Select
+	ButtonBidAll     *widget.Button
 	Bidbar           *fyne.Container
 }
 
@@ -74,7 +76,7 @@ var (
 	left             int
 
 	GameBoard    fyne.Container
-	CenterDeck   *fyne.Container
+	ActionArea   *fyne.Container
 	LastAction   = ""
 	MyDeck       = NewDeck()
 	Gameplayer   = Player{}
@@ -86,6 +88,9 @@ var (
 	SortOrder    string
 	DeckCard     *fyne.Container
 	Playarea     = container.NewCenter()
+	ActionBid    *canvas.Text
+	Sizew        float32
+	Sizeh        float32
 )
 
 func cropImage(c string) *canvas.Image {
@@ -118,7 +123,7 @@ func cropImage(c string) *canvas.Image {
 	}
 	cardimg := canvas.NewImageFromImage(my_sub_image)
 
-	cardimg.SetMinSize(fyne.NewSize(100, 300))
+	cardimg.SetMinSize(fyne.NewSize(100*Sizew, 300*Sizeh))
 	return cardimg
 }
 
@@ -152,6 +157,7 @@ func Turn(button int) {
 				PS.ButtonBlindnil.Disable()
 				PS.ButtonRegularnil.Disable()
 				PS.ButtonBid.Disable()
+				PS.BidValue.Disable()
 			}
 			if button == Buttondiscard {
 				PS.ButtonKeep.Enable()
@@ -159,6 +165,8 @@ func Turn(button int) {
 				PS.ButtonBlindnil.Disable()
 				PS.ButtonRegularnil.Disable()
 				PS.ButtonBid.Disable()
+				PS.BidValue.Disable()
+
 			}
 			HandleCard()
 		}
@@ -206,13 +214,32 @@ func Turn(button int) {
 func HandleCard() {
 	left = len(MyDeck)
 	if left == 0 {
-		PS.ButtonKeep.Disable()
-		PS.ButtonDiscard.Disable()
-		PS.ButtonBlindnil.Enable()
+		PS.ButtonKeep.Hide()
+		PS.ButtonDiscard.Hide()
+		PS.ButtonBlindnil.Hide()
 		PS.ButtonRegularnil.Enable()
 		PS.ButtonBid.Enable()
+		PS.BidValue.Disable()
+		NPC.ButtonKeep.Hide()
+		NPC.ButtonDiscard.Hide()
+		NPC.ButtonBlindnil.Hide()
+		NPC.ButtonRegularnil.Enable()
+		NPC.ButtonBid.Enable()
+		NPC.BidValue.Enable()
 		Mycardimage.Hide()
-		CenterDeck.Hide()
+		ActionArea.RemoveAll()
+		ActionArea.Add(DeckBackImage)
+		turn := "Please Bid " + config.PlayerName
+		if PlayerTurn == "NPC" {
+			turn = "Computer Bidding"
+
+		} else {
+
+		}
+		ActionBid = canvas.NewText(turn, tc.White)
+		ActionBid.TextSize = 64
+		ActionArea.Add(ActionBid)
+		ActionArea.Refresh()
 		return
 	}
 	dc, dcerr := MyDeck.Draw()
@@ -266,15 +293,13 @@ func HandleCard() {
 		SortOrder = SortOrder + "13"
 	}
 	//get ranking of ranks
-	DrawCardSort = SortOrder  + ":" + DrawRank + DrawSuit + ".png"
+	DrawCardSort = SortOrder + ":" + DrawRank + DrawSuit + ".png"
 
-	log.Println("draw card sort", DrawCardSort,PlayerTurn)
+	log.Println("draw card sort", DrawCardSort, PlayerTurn)
 
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
 
-
-
-	Mycardimage.SetMinSize(fyne.NewSize(100, 200))
+	Mycardimage.SetMinSize(fyne.NewSize(100*Sizew, 200*Sizeh))
 	Mycardimage.FillMode = canvas.ImageFillContain
 	Mycardimage.Refresh()
 	Mycardimage.Show()
@@ -305,7 +330,7 @@ func setupgui() {
 	PS.Score.TextSize = 32
 	PS.Tricks = canvas.NewText("0", tc.White)
 	PS.Tricks.TextSize = 32
-	PS.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+	/* 	PS.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		PS.Bidname,
 		PS.Bidlabel,
 		PS.Bid,
@@ -315,7 +340,7 @@ func setupgui() {
 		PS.Score,
 		PS.Bidtrickslabel,
 		PS.Tricks,
-	)
+	) */
 	PS.Cards = container.NewHBox()
 
 	NPC = Game{}
@@ -339,7 +364,7 @@ func setupgui() {
 	NPC.Score.TextSize = 32
 	NPC.Tricks = canvas.NewText("0", tc.White)
 	NPC.Tricks.TextSize = 32
-	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
+	/* 	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		NPC.Bidname,
 		NPC.Bidlabel,
 		NPC.Bid,
@@ -349,7 +374,7 @@ func setupgui() {
 		NPC.Score,
 		NPC.Bidtrickslabel,
 		NPC.Tricks,
-	)
+	) */
 	NPC.Cards = container.NewHBox()
 	NPC.ButtonKeep = widget.NewButton("Keep", func() {
 		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
@@ -365,7 +390,8 @@ func setupgui() {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
-			c.SetMinSize(fyne.NewSize(50, 100))
+
+			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
 			NPC.Cards.Add(c)
 		}
 
@@ -384,12 +410,14 @@ func setupgui() {
 	NPC.ButtonBid = widget.NewButton("Bid", func() {
 
 	})
+	NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 	NPC.Bidbar = container.NewGridWithColumns(5)
 	NPC.Bidbar.Add(NPC.ButtonKeep)
 	NPC.Bidbar.Add(NPC.ButtonDiscard)
 	NPC.Bidbar.Add(NPC.ButtonBlindnil)
 	NPC.Bidbar.Add(NPC.ButtonRegularnil)
 	NPC.Bidbar.Add(NPC.ButtonBid)
+	NPC.Bidbar.Add(NPC.BidValue)
 	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		NPC.Bidname,
 		NPC.Bidlabel,
@@ -410,7 +438,7 @@ func setupgui() {
 	PS.Bidscorelabel.TextSize = 32
 	PS.Bidtrickslabel = canvas.NewText("Tricks:", labelcolor)
 	PS.Bidtrickslabel.TextSize = 32
-	PS.Bidname = canvas.NewText("Human", tc.White)
+	PS.Bidname = canvas.NewText(config.PlayerName, tc.White)
 	PS.Bidname.TextSize = 32
 	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
 	PS.Bidlabel.TextSize = 32
@@ -445,7 +473,8 @@ func setupgui() {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
-			c.SetMinSize(fyne.NewSize(50, 100))
+
+			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
 			PS.Cards.Add(c)
 		}
 		PS.Cards.Refresh()
@@ -468,12 +497,14 @@ func setupgui() {
 
 	})
 	PS.ButtonBid.Disable()
+	PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 	PS.Bidbar = container.NewGridWithColumns(5)
 	PS.Bidbar.Add(PS.ButtonKeep)
 	PS.Bidbar.Add(PS.ButtonDiscard)
 	PS.Bidbar.Add(PS.ButtonBlindnil)
 	PS.Bidbar.Add(PS.ButtonRegularnil)
 	PS.Bidbar.Add(PS.ButtonBid)
+	PS.Bidbar.Add(PS.BidValue)
 
 	PS.ButtonRegularnil.Disable()
 	PS.ButtonBid.Disable()
@@ -491,13 +522,14 @@ func setupgui() {
 	//NPCCardsLayout := layout.NewCustomPaddedLayout(1, 1, 1, 1)
 	//NPCCards = container.New(NPCCardsLayout)
 	DeckBackImage = canvas.NewImageFromResource(getcards.NewEmbeddedResource("green_back.png"))
-	DeckBackImage.SetMinSize(fyne.NewSize(50, 50))
+
+	DeckBackImage.SetMinSize(fyne.NewSize(50*Sizew, 50*Sizeh))
 	DeckBackImage.FillMode = canvas.ImageFillContain
-	CenterDeck = container.NewGridWithColumns(2)
-	CenterDeck.Add(DeckBackImage)
+	ActionArea = container.NewGridWithColumns(2)
+	ActionArea.Add(DeckBackImage)
 	CardsLeft = canvas.NewText(strconv.Itoa(len(MyDeck)), tc.White)
 	CardsLeft.TextSize = 32
-	CenterDeck.Add(CardsLeft)
+	ActionArea.Add(CardsLeft)
 	//DeckCard = container.NewCenter()
 
 	Playarea.Add(&Mycardimage)
@@ -506,7 +538,6 @@ func setupgui() {
 	GameBoard.Add(NPC.ScoreBar)
 	GameBoard.Add(NPC.Bidbar)
 	GameBoard.Add(NPC.Cards)
-	GameBoard.Add(CenterDeck)
 
 	GameBoard.Add(Playarea)
 
@@ -520,7 +551,11 @@ func play() {
 	GameBoard.Add(NPC.ScoreBar)
 	GameBoard.Add(NPC.Bidbar)
 	GameBoard.Add(NPC.Cards)
-	GameBoard.Add(CenterDeck)
+
+	ActionArea = container.NewGridWithColumns(2)
+	GameBoard.Add(ActionArea)
+
+	GameBoard.Add(ActionArea)
 
 	GameBoard.Add(Playarea)
 	GameBoard.Add(PS.Cards)
@@ -559,7 +594,7 @@ func splash() {
 	config.FyneMainWin.SetTitle(config.GetLangs("title") + " " + strconv.FormatUint(memoryStats.Alloc/1024/1024, 10) + " Mib")
 	spadesheader = canvas.NewImageFromResource(getcards.NewEmbeddedResource("honors_spade-14.png"))
 	spadesheader.FillMode = canvas.ImageFillContain
-	spadesheader.SetMinSize(fyne.NewSize(30, 30))
+	spadesheader.SetMinSize(fyne.NewSize(100*Sizew, 200*Sizeh))
 
 	rules := widget.NewMultiLineEntry()
 	rules.SetText(config.GetLangs("rules"))
@@ -587,7 +622,7 @@ func splash() {
 	deckback := widget.NewRadioGroup([]string{"Red", "Yellow", "Purple", "Grey", "Green"}, func(string) {})
 	deckback.SetSelected(config.DeckBack)
 	DeckBackImage = canvas.NewImageFromResource(getcards.NewEmbeddedResource(strings.ToLower(config.DeckBack) + "_back.png"))
-	DeckBackImage.SetMinSize(fyne.NewSize(50, 50))
+	DeckBackImage.SetMinSize(fyne.NewSize(50*Sizew, 50*Sizeh))
 	DeckBackImage.FillMode = canvas.ImageFillContain
 	deckback.Horizontal = false
 
@@ -629,6 +664,11 @@ func splash() {
 		config.DealerPlayer = true
 		PlayerGame = config.NewPlayer(player.Text)
 		NPCGame = config.NewPlayer("NPC")
+		w, _ := strconv.ParseFloat(config.Fyne_scale, 32)
+		h, _ := strconv.ParseFloat(config.Fyne_scale, 32)
+
+		Sizew = float32(w)
+		Sizeh = float32(h)
 		deal()
 
 	})
