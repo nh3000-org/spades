@@ -54,7 +54,7 @@ type Game struct {
 	ButtonRegularnil *widget.Button
 	Bidname          *canvas.Text
 	ButtonBid        *widget.Button
-	BidValue         *widget.Select
+	BidValue         *widget.Entry
 	ButtonBidAll     *widget.Button
 	Bidbar           *fyne.Container
 }
@@ -410,8 +410,10 @@ func setupgui() {
 	NPC.ButtonBid = widget.NewButton("Bid", func() {
 
 	})
-	NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
-	NPC.Bidbar = container.NewGridWithColumns(5)
+	//NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
+
+	NPC.BidValue = widget.NewEntry()
+	NPC.Bidbar = container.NewGridWithColumns(6)
 	NPC.Bidbar.Add(NPC.ButtonKeep)
 	NPC.Bidbar.Add(NPC.ButtonDiscard)
 	NPC.Bidbar.Add(NPC.ButtonBlindnil)
@@ -497,8 +499,9 @@ func setupgui() {
 
 	})
 	PS.ButtonBid.Disable()
-	PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
-	PS.Bidbar = container.NewGridWithColumns(5)
+	//PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
+	PS.BidValue = widget.NewEntry()
+	PS.Bidbar = container.NewGridWithColumns(6)
 	PS.Bidbar.Add(PS.ButtonKeep)
 	PS.Bidbar.Add(PS.ButtonDiscard)
 	PS.Bidbar.Add(PS.ButtonBlindnil)
