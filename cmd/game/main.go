@@ -227,19 +227,8 @@ func HandleCard() {
 		NPC.ButtonBid.Enable()
 		NPC.BidValue.Enable()
 		Mycardimage.Hide()
-		ActionArea.RemoveAll()
-		ActionArea.Add(DeckBackImage)
-		turn := "Please Bid " + config.PlayerName
-		if PlayerTurn == "NPC" {
-			turn = "Computer Bidding"
 
-		} else {
-
-		}
-		ActionBid = canvas.NewText(turn, tc.White)
-		ActionBid.TextSize = 64
-		ActionArea.Add(ActionBid)
-		ActionArea.Refresh()
+		bid()
 		return
 	}
 	dc, dcerr := MyDeck.Draw()
@@ -557,6 +546,32 @@ func play() {
 
 	ActionArea = container.NewGridWithColumns(2)
 	GameBoard.Add(ActionArea)
+
+	GameBoard.Add(ActionArea)
+
+	GameBoard.Add(Playarea)
+	GameBoard.Add(PS.Cards)
+
+	GameBoard.Add(PS.Bidbar)
+	GameBoard.Add(PS.ScoreBar)
+}
+func bid() {
+	GameBoard.RemoveAll()
+	GameBoard.Add(NPC.ScoreBar)
+	GameBoard.Add(NPC.Bidbar)
+	GameBoard.Add(NPC.Cards)
+	ActionArea.RemoveAll()
+	ActionArea = container.NewGridWithColumns(2)
+	ActionArea.Add(DeckBackImage)
+	turn := "Please Bid " + config.PlayerName
+	if PlayerTurn == "NPC" {
+		turn = "Computer Bidding"
+
+	}
+	ActionBid = canvas.NewText(turn, tc.White)
+	ActionBid.TextSize = 64
+	ActionArea.Add(ActionBid)
+	ActionArea.Refresh()
 
 	GameBoard.Add(ActionArea)
 
