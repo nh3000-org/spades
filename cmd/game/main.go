@@ -51,6 +51,7 @@ type Game struct {
 	ButtonKeep       *widget.Button
 	ButtonDiscard    *widget.Button
 	ButtonBlindnil   *widget.Button
+	ButtonSTM        *widget.Button
 	ButtonRegularnil *widget.Button
 	Bidname          *canvas.Text
 	ButtonBid        *widget.Button
@@ -71,6 +72,7 @@ var (
 	Buttondiscard    = 2
 	Buttonblindnil   = 3
 	Buttonregularnil = 4
+	ButtonSTM        = 5
 	done             = false
 	Mycardimage      canvas.Image
 	left             int
@@ -217,12 +219,14 @@ func HandleCard() {
 		PS.ButtonKeep.Hide()
 		PS.ButtonDiscard.Hide()
 		PS.ButtonBlindnil.Hide()
+		PS.ButtonSTM.Hide()
 		PS.ButtonRegularnil.Enable()
 		PS.ButtonBid.Enable()
-		PS.BidValue.Disable()
+		PS.BidValue.Enable()
 		NPC.ButtonKeep.Hide()
 		NPC.ButtonDiscard.Hide()
 		NPC.ButtonBlindnil.Hide()
+		NPC.ButtonSTM.Hide()
 		NPC.ButtonRegularnil.Enable()
 		NPC.ButtonBid.Enable()
 		NPC.BidValue.Enable()
@@ -319,17 +323,7 @@ func setupgui() {
 	PS.Score.TextSize = 32
 	PS.Tricks = canvas.NewText("0", tc.White)
 	PS.Tricks.TextSize = 32
-	/* 	PS.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
-		PS.Bidname,
-		PS.Bidlabel,
-		PS.Bid,
-		PS.Bidbagslabel,
-		PS.Bags,
-		PS.Bidscorelabel,
-		PS.Score,
-		PS.Bidtrickslabel,
-		PS.Tricks,
-	) */
+
 	PS.Cards = container.NewHBox()
 
 	NPC = Game{}
@@ -353,23 +347,9 @@ func setupgui() {
 	NPC.Score.TextSize = 32
 	NPC.Tricks = canvas.NewText("0", tc.White)
 	NPC.Tricks.TextSize = 32
-	/* 	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
-		NPC.Bidname,
-		NPC.Bidlabel,
-		NPC.Bid,
-		NPC.Bidbagslabel,
-		NPC.Bags,
-		NPC.Bidscorelabel,
-		NPC.Score,
-		NPC.Bidtrickslabel,
-		NPC.Tricks,
-	) */
+
 	NPC.Cards = container.NewHBox()
 	NPC.ButtonKeep = widget.NewButton("Keep", func() {
-		//deckbackimage := canvas.NewImageFromResource(getcards.NewEmbeddedResource(DrawCard))
-		//deckbackimage.SetMinSize(fyne.NewSize(100, 100))
-		//deckbackimage.FillMode = canvas.ImageFillContain
-		//NPCCards.Add(deckbackimage)
 
 		NPC.CardList = append(NPC.CardList, DrawCardSort)
 		sort.Strings(NPC.CardList)
@@ -393,6 +373,9 @@ func setupgui() {
 	NPC.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 
 	})
+	NPC.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
+
+	})
 	NPC.ButtonRegularnil = widget.NewButton("Nil", func() {
 
 	})
@@ -402,13 +385,21 @@ func setupgui() {
 	//NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 
 	NPC.BidValue = widget.NewEntry()
-	NPC.Bidbar = container.NewGridWithColumns(6)
+	NPC.Bidbar = container.NewGridWithColumns(7)
 	NPC.Bidbar.Add(NPC.ButtonKeep)
 	NPC.Bidbar.Add(NPC.ButtonDiscard)
 	NPC.Bidbar.Add(NPC.ButtonBlindnil)
+	NPC.Bidbar.Add(NPC.ButtonSTM)
 	NPC.Bidbar.Add(NPC.ButtonRegularnil)
 	NPC.Bidbar.Add(NPC.ButtonBid)
 	NPC.Bidbar.Add(NPC.BidValue)
+	NPC.ButtonKeep.Disable()
+	NPC.ButtonDiscard.Disable()
+	NPC.ButtonBlindnil.Disable()
+	NPC.ButtonSTM.Disable()
+	NPC.ButtonRegularnil.Disable()
+	NPC.ButtonBid.Disable()
+	NPC.BidValue.Disable()
 	NPC.ScoreBar = container.New(layout.NewGridLayoutWithColumns(9),
 		NPC.Bidname,
 		NPC.Bidlabel,
@@ -420,6 +411,7 @@ func setupgui() {
 		NPC.Bidtrickslabel,
 		NPC.Tricks,
 	)
+	
 	PS = Game{}
 	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
 	PS.Bidlabel.TextSize = 32
@@ -481,6 +473,9 @@ func setupgui() {
 	PS.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 
 	})
+	PS.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
+
+	})
 	PS.ButtonRegularnil = widget.NewButton("Nil", func() {
 
 	})
@@ -490,10 +485,11 @@ func setupgui() {
 	PS.ButtonBid.Disable()
 	//PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 	PS.BidValue = widget.NewEntry()
-	PS.Bidbar = container.NewGridWithColumns(6)
+	PS.Bidbar = container.NewGridWithColumns(7)
 	PS.Bidbar.Add(PS.ButtonKeep)
 	PS.Bidbar.Add(PS.ButtonDiscard)
 	PS.Bidbar.Add(PS.ButtonBlindnil)
+	PS.Bidbar.Add(PS.ButtonSTM)
 	PS.Bidbar.Add(PS.ButtonRegularnil)
 	PS.Bidbar.Add(PS.ButtonBid)
 	PS.Bidbar.Add(PS.BidValue)
@@ -539,7 +535,7 @@ func setupgui() {
 	GameBoard.Add(PS.ScoreBar)
 }
 func play() {
-
+	GameBoard.RemoveAll()
 	GameBoard.Add(NPC.ScoreBar)
 	GameBoard.Add(NPC.Bidbar)
 	GameBoard.Add(NPC.Cards)
