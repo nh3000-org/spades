@@ -72,7 +72,8 @@ var (
 	Buttondiscard    = 2
 	Buttonblindnil   = 3
 	Buttonregularnil = 4
-	ButtonSTM        = 5
+	Buttonstm        = 5
+	Buttonbid        = 6
 	done             = false
 	Mycardimage      canvas.Image
 	left             int
@@ -363,24 +364,48 @@ func setupgui() {
 			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
 			NPC.Cards.Add(c)
 		}
-
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
 		NPC.Cards.Refresh()
 
 	})
 	NPC.ButtonDiscard = widget.NewButton("Discard", func() {
-
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
+		Turn(Buttondiscard)
 	})
 	NPC.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
+		NPC.BidValue.Text = "BLINDNIL"
+		NPC.BidValue.Disable()
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
+		NPC.ButtonRegularnil.Disable()
+		NPC.ButtonBid.Disable()
+		Turn(Buttonblindnil)
 
 	})
 	NPC.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
+		NPC.BidValue.Text = "STM"
 
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
+		NPC.BidValue.Disable()
+		Turn(Buttonstm)
 	})
 	NPC.ButtonRegularnil = widget.NewButton("Nil", func() {
-
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
+		NPC.ButtonRegularnil.Disable()
+		NPC.BidValue.Text = "NIL"
+		NPC.BidValue.Disable()
+		Turn(Buttonregularnil)
 	})
 	NPC.ButtonBid = widget.NewButton("Bid", func() {
-
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonSTM.Disable()
+		NPC.ButtonRegularnil.Disable()
+		NPC.BidValue.Disable()
+		Turn(Buttonbid)
 	})
 	//NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 
@@ -411,7 +436,7 @@ func setupgui() {
 		NPC.Bidtrickslabel,
 		NPC.Tricks,
 	)
-	
+
 	PS = Game{}
 	PS.Bidlabel = canvas.NewText("Bid:", labelcolor)
 	PS.Bidlabel.TextSize = 32
@@ -461,26 +486,52 @@ func setupgui() {
 			PS.Cards.Add(c)
 		}
 		PS.Cards.Refresh()
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
 		//log.Println("playerkeep", PS.Cards)
 		Turn(Buttonkeep)
 
 	})
 	PS.ButtonDiscard = widget.NewButton("Discard", func() {
 		LastAction = "DISCARD"
-
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
 		Turn(Buttondiscard)
 	})
 	PS.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
+		PS.BidValue.Text = "BLINDNIL"
+		PS.BidValue.Disable()
+		PS.ButtonBid.Disable()
+		PS.ButtonRegularnil.Disable()
+		Turn(Buttonblindnil)
 
 	})
 	PS.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
-
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
+		PS.BidValue.Text = "STM"
+		PS.BidValue.Disable()
+		PS.BidValue.Disable()
+		PS.ButtonBid.Disable()
+		PS.ButtonRegularnil.Disable()
+		Turn(Buttonstm)
 	})
 	PS.ButtonRegularnil = widget.NewButton("Nil", func() {
-
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
+		PS.ButtonRegularnil.Disable()
+		PS.BidValue.Text = "NIL"
+		PS.BidValue.Disable()
+		Turn(Buttonregularnil)
 	})
 	PS.ButtonBid = widget.NewButton("Bid", func() {
-
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonSTM.Disable()
+		PS.ButtonRegularnil.Disable()
+		PS.BidValue.Disable()
+		Turn(Buttonbid)
 	})
 	PS.ButtonBid.Disable()
 	//PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
@@ -554,7 +605,9 @@ func play() {
 func bid() {
 	GameBoard.RemoveAll()
 	GameBoard.Add(NPC.ScoreBar)
-	GameBoard.Add(NPC.Bidbar)
+	if NPC.BidValue != nil {
+		GameBoard.Add(NPC.Bidbar)
+	}
 	GameBoard.Add(NPC.Cards)
 	ActionArea.RemoveAll()
 	ActionArea = container.NewGridWithColumns(2)
@@ -573,8 +626,9 @@ func bid() {
 
 	GameBoard.Add(Playarea)
 	GameBoard.Add(PS.Cards)
-
-	GameBoard.Add(PS.Bidbar)
+	if PS.BidValue != nil {
+		GameBoard.Add(PS.Bidbar)
+	}
 	GameBoard.Add(PS.ScoreBar)
 }
 
