@@ -66,15 +66,15 @@ var (
 	memoryStats      runtime.MemStats
 	spadesheader     *canvas.Image
 	CardsLeft        *canvas.Text
-	PlayerTurn       = "PLAYER"
-	TurnCount        int // 1 is first turn // 2 is second trun
-	Buttonkeep       = 1
-	Buttondiscard    = 2
-	Buttonblindnil   = 3
-	Buttonregularnil = 4
-	Buttonstm        = 5
-	Buttonbid        = 6
-	done             = false
+	PlayerTurn           = "PLAYER"
+	TurnCount        int = 1 // 1 is first turn // 2 is second trun
+	Buttonkeep           = 1
+	Buttondiscard        = 2
+	Buttonblindnil       = 3
+	Buttonregularnil     = 4
+	Buttonstm            = 5
+	Buttonbid            = 6
+	done                 = false
 	Mycardimage      canvas.Image
 	left             int
 
@@ -130,7 +130,112 @@ func cropImage(c string) *canvas.Image {
 	return cardimg
 }
 
+var ShadowTurn string
+
 func Turn(button int) {
+
+	ShadowTurn = PlayerTurn
+	log.Println("Start Turn count", TurnCount, "turn", PlayerTurn)
+	//TurnCount++
+	if TurnCount > 2 {
+		TurnCount = 1
+		if ShadowTurn == "PLAYER" {
+			PlayerTurn = "NPC"
+			PS.ButtonKeep.Disable()
+			PS.ButtonDiscard.Disable()
+			PS.ButtonBlindnil.Disable()
+			PS.ButtonSTM.Disable()
+			PS.ButtonRegularnil.Disable()
+			PS.ButtonBid.Disable()
+			NPC.ButtonKeep.Enable()
+			NPC.ButtonDiscard.Enable()
+			NPC.ButtonBlindnil.Disable()
+			NPC.ButtonSTM.Disable()
+			NPC.ButtonRegularnil.Disable()
+			NPC.ButtonBid.Disable()
+		}
+		if ShadowTurn == "NPC" {
+			PlayerTurn = "PLAYER"
+			log.Println("PLAYER TURN")
+			PS.ButtonKeep.Enable()
+			PS.ButtonDiscard.Enable()
+			PS.ButtonBlindnil.Disable()
+			PS.ButtonSTM.Disable()
+			PS.ButtonRegularnil.Disable()
+			PS.ButtonBid.Disable()
+			NPC.ButtonKeep.Disable()
+			NPC.ButtonDiscard.Disable()
+			NPC.ButtonBlindnil.Disable()
+			NPC.ButtonSTM.Disable()
+			NPC.ButtonRegularnil.Disable()
+			NPC.ButtonBid.Disable()
+		}
+	}
+	if TurnCount == 1 {
+		// player
+		if PlayerTurn == "PLAYER" {
+			PS.ButtonKeep.Enable()
+			PS.ButtonDiscard.Enable()
+			if button == Buttonkeep {
+				PS.ButtonKeep.Disable()
+				PS.ButtonDiscard.Enable()
+				PS.ButtonBlindnil.Disable()
+				PS.ButtonRegularnil.Disable()
+				PS.ButtonBid.Disable()
+				PS.BidValue.Disable()
+				log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+			}
+			if button == Buttondiscard {
+				PS.ButtonKeep.Enable()
+				PS.ButtonDiscard.Disable()
+				PS.ButtonBlindnil.Disable()
+				PS.ButtonRegularnil.Disable()
+				PS.ButtonBid.Disable()
+				PS.BidValue.Disable()
+				log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+			}
+			TurnCount++
+			HandleCard()
+			return
+		}
+		if PlayerTurn == "NPC" {
+			NPC.ButtonKeep.Enable()
+			NPC.ButtonDiscard.Enable()
+			if button == Buttonkeep {
+				NPC.ButtonKeep.Disable()
+				NPC.ButtonDiscard.Enable()
+				NPC.ButtonBlindnil.Disable()
+				NPC.ButtonRegularnil.Disable()
+				NPC.ButtonBid.Disable()
+				NPC.BidValue.Disable()
+				log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+			}
+			if button == Buttondiscard {
+				NPC.ButtonKeep.Enable()
+				NPC.ButtonDiscard.Disable()
+				NPC.ButtonBlindnil.Disable()
+				NPC.ButtonRegularnil.Disable()
+				NPC.ButtonBid.Disable()
+				NPC.BidValue.Disable()
+				log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+
+			}
+			TurnCount++
+			HandleCard()
+			return
+		}
+		// npc
+
+	}
+	if TurnCount == 2 {
+		TurnCount++
+		HandleCard()
+		return
+
+	}
+
+}
+func TurnDEPRECATED(button int) {
 
 	TurnCount++
 	log.Println("Turn count", TurnCount, "playerturn", PlayerTurn)
@@ -289,7 +394,7 @@ func HandleCard() {
 	//get ranking of ranks
 	DrawCardSort = SortOrder + ":" + DrawRank + DrawSuit + ".png"
 
-	log.Println("draw card sort", DrawCardSort, PlayerTurn)
+	//log.Println("draw card sort", DrawCardSort, PlayerTurn)
 
 	Mycardimage.Resource = getcards.NewEmbeddedResource(DrawCard)
 
@@ -474,7 +579,7 @@ func setupgui() {
 		LastAction = "KEEP"
 
 		PS.CardList = append(PS.CardList, DrawCardSort)
-		log.Println(DrawCard)
+		//log.Println(DrawCard)
 		sort.Strings(PS.CardList)
 		PS.Cards.RemoveAll()
 		for _, card := range PS.CardList {
@@ -645,7 +750,7 @@ func deal() {
 
 	Gameplayer = Player{deck: &MyDeck}
 	NPCplayer = Player{deck: &MyDeck}
-	log.Println(Gameplayer.hand, NPCplayer.hand)
+	//log.Println(Gameplayer.hand, NPCplayer.hand)
 
 	HandleCard()
 
