@@ -33,18 +33,21 @@ var PS Game
 var NPC Game
 
 type Game struct {
-	Stats         config.PS
-	Left          *canvas.Text
-	Bid           *canvas.Text
-	Bags          *canvas.Text
-	Score         *canvas.Text
-	Tricks        *canvas.Text
-	ScoreBar      *fyne.Container
-	Cards         *fyne.Container
-	CardList      []string
-	Bidlabel      *canvas.Text
-	Bidbagslabel  *canvas.Text
-	Bidscorelabel *canvas.Text
+	Stats           config.PS
+	Left            *canvas.Text
+	Bid             *canvas.Text
+	Bags            *canvas.Text
+	Score           *canvas.Text
+	Tricks          *canvas.Text
+	ScoreBar        *fyne.Container
+	Cards           *fyne.Container
+	SACards         *fyne.Container
+	SADiscards      *fyne.Container
+	CardList        []string
+	CardDiscardList []string
+	Bidlabel        *canvas.Text
+	Bidbagslabel    *canvas.Text
+	Bidscorelabel   *canvas.Text
 
 	Bidtrickslabel *canvas.Text
 
@@ -61,25 +64,32 @@ type Game struct {
 }
 
 var (
-	PlayerGame       config.PS
-	NPCGame          config.PS
-	memoryStats      runtime.MemStats
-	spadesheader     *canvas.Image
-	CardsLeft        *canvas.Text
-	PlayerTurn           = "PLAYER"
-	TurnCount        int = 1 // 1 is first turn // 2 is second trun
-	Buttonkeep           = 1
-	Buttondiscard        = 2
-	Buttonblindnil       = 3
-	Buttonregularnil     = 4
-	Buttonstm            = 5
-	Buttonbid            = 6
-	done                 = false
-	Mycardimage      canvas.Image
-	left             int
+	PlayerGame          config.PS
+	NPCGame             config.PS
+	memoryStats         runtime.MemStats
+	spadesheader        *canvas.Image
+	CardsLeft           *canvas.Text
+	PlayerTurn              = "PLAYER"
+	TurnCount           int = 1 // 1 is first turn // 2 is second trun
+	NPCButtonkeep           = 1
+	NPCButtondiscard        = 2
+	NPCButtonblindnil       = 3
+	NPCButtonregularnil     = 4
+	NPCButtonstm            = 5
+	NPCButtonbid            = 6
+	PSButtonkeep            = 7
+	PSButtondiscard         = 8
+	PSButtonblindnil        = 9
+	PSButtonregularnil      = 10
+	PSButtonstm             = 11
+	PSButtonbid             = 12
+	done                    = false
+	Mycardimage         canvas.Image
+	left                int
 
 	GameBoard    fyne.Container
 	ActionArea   *fyne.Container
+	StatsArea    *fyne.Container
 	LastAction   = ""
 	MyDeck       = NewDeck()
 	Gameplayer   = Player{}
@@ -94,6 +104,7 @@ var (
 	ActionBid    *canvas.Text
 	Sizew        float32
 	Sizeh        float32
+	SACardsLeft  = container.NewGridWithColumns(2)
 )
 
 func cropImage(c string) *canvas.Image {
@@ -132,12 +143,109 @@ func cropImage(c string) *canvas.Image {
 
 var ShadowTurn string
 
+/*
+	 	NPCButtonkeep           = 1
+		NPCButtondiscard        = 2
+		NPCButtonblindnil       = 3
+		NPCButtonregularnil     = 4
+		NPCButtonstm            = 5
+		NPCButtonbid            = 6
+			PSButtonkeep           = 7
+		PSButtondiscard        = 8
+		PSButtonblindnil       = 9
+		PSButtonregularnil     = 10
+		PSButtonstm            = 11
+		PSButtonbid            = 12
+*/
 func Turn(button int) {
 
 	ShadowTurn = PlayerTurn
-	log.Println("Start Turn count", TurnCount, "turn", PlayerTurn)
+	//CardsLeft.Text = strconv.Itoa(len(MyDeck))
+	//SACardsLeft.Refresh()
+
+	//log.Println("draw card ", dc.Rank, dc.Suit)
+
+	log.Println("Turn count START", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
 	//TurnCount++
+	if button == PSButtonkeep {
+		PS.ButtonKeep.Disable()
+		PS.ButtonDiscard.Enable()
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonRegularnil.Disable()
+		PS.ButtonBid.Disable()
+		PS.BidValue.Disable()
+		log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+		TurnCount++
+
+		HandleCard()
+
+	}
+	if button == PSButtondiscard {
+		PS.ButtonKeep.Enable()
+		PS.ButtonDiscard.Disable()
+		PS.ButtonBlindnil.Disable()
+		PS.ButtonRegularnil.Disable()
+		PS.ButtonBid.Disable()
+		PS.BidValue.Disable()
+		log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+		TurnCount++
+
+		HandleCard()
+
+	}
+	if button == NPCButtonkeep {
+		NPC.ButtonKeep.Disable()
+		NPC.ButtonDiscard.Enable()
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonRegularnil.Disable()
+		NPC.ButtonBid.Disable()
+		NPC.BidValue.Disable()
+		log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+		TurnCount++
+
+		HandleCard()
+
+	}
+	if button == NPCButtondiscard {
+		NPC.ButtonKeep.Enable()
+		NPC.ButtonDiscard.Disable()
+		NPC.ButtonBlindnil.Disable()
+		NPC.ButtonRegularnil.Disable()
+		NPC.ButtonBid.Disable()
+		NPC.BidValue.Disable()
+		log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+		TurnCount++
+
+		HandleCard()
+
+	}
+	/* 	log.Println("Turn count 1", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
+	   	if TurnCount == 2 {
+	   		// player
+	   		if PlayerTurn == "PLAYER" {
+	   			PS.ButtonKeep.Enable()
+	   			PS.ButtonDiscard.Enable()
+	   			NPC.ButtonKeep.Disable()
+	   			NPC.ButtonDiscard.Disable()
+
+	   			TurnCount++
+
+	   		}
+	   		if PlayerTurn == "NPC" {
+	   			NPC.ButtonKeep.Enable()
+	   			NPC.ButtonDiscard.Enable()
+	   			PS.ButtonKeep.Disable()
+	   			PS.ButtonDiscard.Disable()
+
+	   			TurnCount++
+
+	   		}
+	   		// npc
+
+	   	} */
+	log.Println("Turn count ", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
 	if TurnCount > 2 {
+
 		TurnCount = 1
 		if ShadowTurn == "PLAYER" {
 			PlayerTurn = "NPC"
@@ -170,150 +278,8 @@ func Turn(button int) {
 			NPC.ButtonRegularnil.Disable()
 			NPC.ButtonBid.Disable()
 		}
-	}
-	if TurnCount == 1 {
-		// player
-		if PlayerTurn == "PLAYER" {
-			PS.ButtonKeep.Enable()
-			PS.ButtonDiscard.Enable()
-			if button == Buttonkeep {
-				PS.ButtonKeep.Disable()
-				PS.ButtonDiscard.Enable()
-				PS.ButtonBlindnil.Disable()
-				PS.ButtonRegularnil.Disable()
-				PS.ButtonBid.Disable()
-				PS.BidValue.Disable()
-				log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
-			}
-			if button == Buttondiscard {
-				PS.ButtonKeep.Enable()
-				PS.ButtonDiscard.Disable()
-				PS.ButtonBlindnil.Disable()
-				PS.ButtonRegularnil.Disable()
-				PS.ButtonBid.Disable()
-				PS.BidValue.Disable()
-				log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
-			}
-			TurnCount++
-			HandleCard()
-			return
-		}
-		if PlayerTurn == "NPC" {
-			NPC.ButtonKeep.Enable()
-			NPC.ButtonDiscard.Enable()
-			if button == Buttonkeep {
-				NPC.ButtonKeep.Disable()
-				NPC.ButtonDiscard.Enable()
-				NPC.ButtonBlindnil.Disable()
-				NPC.ButtonRegularnil.Disable()
-				NPC.ButtonBid.Disable()
-				NPC.BidValue.Disable()
-				log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
-			}
-			if button == Buttondiscard {
-				NPC.ButtonKeep.Enable()
-				NPC.ButtonDiscard.Disable()
-				NPC.ButtonBlindnil.Disable()
-				NPC.ButtonRegularnil.Disable()
-				NPC.ButtonBid.Disable()
-				NPC.BidValue.Disable()
-				log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
 
-			}
-			TurnCount++
-			HandleCard()
-			return
-		}
-		// npc
-
-	}
-	if TurnCount == 2 {
-		TurnCount++
-		HandleCard()
 		return
-
-	}
-
-}
-func TurnDEPRECATED(button int) {
-
-	TurnCount++
-	log.Println("Turn count", TurnCount, "playerturn", PlayerTurn)
-	done = false
-	if TurnCount > 2 {
-		if PlayerTurn == "PLAYER" {
-			PlayerTurn = "NPC"
-			done = true
-			log.Println("in player")
-
-		}
-		if PlayerTurn == "NPC" && !done {
-			PlayerTurn = "PLAYER"
-			log.Println("in npc")
-		}
-		TurnCount = 1
-	}
-
-	if TurnCount == 1 {
-		// player
-		if PlayerTurn == "PLAYER" {
-			PS.ButtonKeep.Enable()
-			PS.ButtonDiscard.Enable()
-			if button == Buttonkeep {
-				PS.ButtonKeep.Disable()
-				PS.ButtonDiscard.Enable()
-				PS.ButtonBlindnil.Disable()
-				PS.ButtonRegularnil.Disable()
-				PS.ButtonBid.Disable()
-				PS.BidValue.Disable()
-			}
-			if button == Buttondiscard {
-				PS.ButtonKeep.Enable()
-				PS.ButtonDiscard.Disable()
-				PS.ButtonBlindnil.Disable()
-				PS.ButtonRegularnil.Disable()
-				PS.ButtonBid.Disable()
-				PS.BidValue.Disable()
-
-			}
-			HandleCard()
-		}
-		// npc
-
-	}
-	if TurnCount == 2 {
-		if PlayerTurn == "PLAYER" {
-			if button == Buttonkeep {
-				/* 				Playerkeep.Disable()
-				   				Playerdiscard.Enable()
-				   				Playerblindnil.Disable()
-				   				Playerregularnil.Disable()
-				   				Playerbid.Disable() */
-			}
-			if button == Buttondiscard {
-				/* 				Playerkeep.Enable()
-				   				Playerdiscard.Disable()
-				   				Playerblindnil.Disable()
-				   				Playerregularnil.Disable()
-				   				Playerbid.Disable() */
-			}
-			HandleCard()
-
-			NPC.ButtonKeep.Enable()
-			NPC.ButtonDiscard.Disable()
-			NPC.ButtonBlindnil.Disable()
-			NPC.ButtonRegularnil.Disable()
-			//NPCBid.Disable()
-			NPC.ButtonKeep.Tapped(nil)
-			HandleCard()
-			NPC.ButtonDiscard.Tapped(nil)
-
-			HandleCard()
-			TurnCount = 0
-			PlayerTurn = "PLAYER"
-			PS.ButtonKeep.Enable()
-			PS.ButtonDiscard.Enable()
-		}
 
 	}
 
@@ -347,6 +313,7 @@ func HandleCard() {
 	}
 
 	CardsLeft.Text = strconv.Itoa(len(MyDeck))
+	SACardsLeft.Refresh()
 
 	//log.Println("draw card ", dc.Rank, dc.Suit)
 	DrawRank = dc.Rank.String()
@@ -472,12 +439,14 @@ func setupgui() {
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
 		NPC.Cards.Refresh()
+		Turn(NPCButtonkeep)
 
 	})
 	NPC.ButtonDiscard = widget.NewButton("Discard", func() {
+		NPC.CardDiscardList = append(NPC.CardDiscardList, DrawCardSort)
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
-		Turn(Buttondiscard)
+		Turn(NPCButtondiscard)
 	})
 	NPC.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 		NPC.BidValue.Text = "BLINDNIL"
@@ -486,7 +455,7 @@ func setupgui() {
 		NPC.ButtonSTM.Disable()
 		NPC.ButtonRegularnil.Disable()
 		NPC.ButtonBid.Disable()
-		Turn(Buttonblindnil)
+		Turn(NPCButtonblindnil)
 
 	})
 	NPC.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
@@ -495,7 +464,7 @@ func setupgui() {
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
 		NPC.BidValue.Disable()
-		Turn(Buttonstm)
+		Turn(NPCButtonstm)
 	})
 	NPC.ButtonRegularnil = widget.NewButton("Nil", func() {
 		NPC.ButtonBlindnil.Disable()
@@ -503,14 +472,14 @@ func setupgui() {
 		NPC.ButtonRegularnil.Disable()
 		NPC.BidValue.Text = "NIL"
 		NPC.BidValue.Disable()
-		Turn(Buttonregularnil)
+		Turn(NPCButtonregularnil)
 	})
 	NPC.ButtonBid = widget.NewButton("Bid", func() {
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
 		NPC.ButtonRegularnil.Disable()
 		NPC.BidValue.Disable()
-		Turn(Buttonbid)
+		Turn(NPCButtonbid)
 	})
 	//NPC.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
 
@@ -575,6 +544,7 @@ func setupgui() {
 		PS.Tricks,
 	)
 	PS.Cards = container.NewHBox()
+	PS.SACards = container.NewHBox()
 	PS.ButtonKeep = widget.NewButton("Keep", func() {
 		LastAction = "KEEP"
 
@@ -582,6 +552,7 @@ func setupgui() {
 		//log.Println(DrawCard)
 		sort.Strings(PS.CardList)
 		PS.Cards.RemoveAll()
+		PS.SACards.RemoveAll()
 		for _, card := range PS.CardList {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
@@ -589,19 +560,39 @@ func setupgui() {
 
 			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
 			PS.Cards.Add(c)
+			d := cropImage(s[1])
+			d.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+
+			d.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
+			PS.SACards.Add(d)
 		}
 		PS.Cards.Refresh()
+		PS.SACards.Refresh()
+
 		PS.ButtonBlindnil.Disable()
 		PS.ButtonSTM.Disable()
-		//log.Println("playerkeep", PS.Cards)
-		Turn(Buttonkeep)
+		Turn(PSButtonkeep)
 
 	})
+	PS.SADiscards = container.NewHBox()
 	PS.ButtonDiscard = widget.NewButton("Discard", func() {
+		PS.CardDiscardList = append(PS.CardDiscardList, DrawCardSort)
+		sort.Strings(PS.CardList)
+		PS.SADiscards.RemoveAll()
+		for _, card := range PS.CardList {
+			s := strings.Split(card, ":")
+			c := cropImage(s[1])
+			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+
+			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
+			PS.SADiscards.Add(c)
+		}
+		PS.SADiscards.Refresh()
+
 		LastAction = "DISCARD"
 		PS.ButtonBlindnil.Disable()
 		PS.ButtonSTM.Disable()
-		Turn(Buttondiscard)
+		Turn(PSButtondiscard)
 	})
 	PS.ButtonBlindnil = widget.NewButton("Blind Nil", func() {
 		PS.ButtonBlindnil.Disable()
@@ -610,7 +601,7 @@ func setupgui() {
 		PS.BidValue.Disable()
 		PS.ButtonBid.Disable()
 		PS.ButtonRegularnil.Disable()
-		Turn(Buttonblindnil)
+		Turn(PSButtonblindnil)
 
 	})
 	PS.ButtonSTM = widget.NewButton("Shoot The Moon", func() {
@@ -621,7 +612,7 @@ func setupgui() {
 		PS.BidValue.Disable()
 		PS.ButtonBid.Disable()
 		PS.ButtonRegularnil.Disable()
-		Turn(Buttonstm)
+		Turn(PSButtonstm)
 	})
 	PS.ButtonRegularnil = widget.NewButton("Nil", func() {
 		PS.ButtonBlindnil.Disable()
@@ -629,14 +620,14 @@ func setupgui() {
 		PS.ButtonRegularnil.Disable()
 		PS.BidValue.Text = "NIL"
 		PS.BidValue.Disable()
-		Turn(Buttonregularnil)
+		Turn(PSButtonregularnil)
 	})
 	PS.ButtonBid = widget.NewButton("Bid", func() {
 		PS.ButtonBlindnil.Disable()
 		PS.ButtonSTM.Disable()
 		PS.ButtonRegularnil.Disable()
 		PS.BidValue.Disable()
-		Turn(Buttonbid)
+		Turn(PSButtonbid)
 	})
 	PS.ButtonBid.Disable()
 	//PS.BidValue = widget.NewSelect([]string{"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"}, func(string) {})
@@ -689,6 +680,26 @@ func setupgui() {
 
 	GameBoard.Add(PS.Bidbar)
 	GameBoard.Add(PS.ScoreBar)
+
+	SAStats := container.NewVBox()
+	SACardsLeft = container.NewGridWithColumns(2)
+	SACLabel := canvas.NewText("Cards Left:", tc.White)
+	SACardsLeft.Add(SACLabel)
+	SACardsLeft.Add(CardsLeft)
+
+	SAPSHand := container.NewGridWithColumns(2)
+	SAPSLabel := canvas.NewText("Player Hand:", tc.White)
+
+	SAPSHand.Add(SAPSLabel)
+
+	SAStats.Add(SACardsLeft)
+	SAStats.Add(SAPSHand)
+	SAStats.Add(PS.SACards)
+	config.FyneStatsWin.SetContent(SAStats)
+
+	config.FyneStatsWin.SetTitle("Statistics")
+	config.FyneStatsWin.Resize(fyne.NewSize(1024, 800))
+	config.FyneStatsWin.Show()
 }
 func play() {
 	GameBoard.RemoveAll()
@@ -857,6 +868,8 @@ func main() {
 	config.FyneApp = a
 	var w = a.NewWindow("Spades 4 Two")
 	config.FyneMainWin = w
+	var w2 = a.NewWindow("Spades 4 Two Stats")
+	config.FyneStatsWin = w2
 
 	config.PreferedLanguage = "eng"
 	if strings.HasPrefix(os.Getenv("LANG"), "en") {
@@ -884,4 +897,5 @@ func main() {
 	config.FyneMainWin.Resize(fyne.NewSize(1024, 800))
 	splash()
 	config.FyneMainWin.ShowAndRun()
+
 }
