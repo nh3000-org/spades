@@ -579,7 +579,7 @@ func setupgui() {
 		PS.CardDiscardList = append(PS.CardDiscardList, DrawCardSort)
 		sort.Strings(PS.CardList)
 		PS.SADiscards.RemoveAll()
-		for _, card := range PS.CardList {
+		for _, card := range PS.CardDiscardList {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
@@ -687,14 +687,19 @@ func setupgui() {
 	SACardsLeft.Add(SACLabel)
 	SACardsLeft.Add(CardsLeft)
 
-	SAPSHand := container.NewGridWithColumns(2)
+	SAPSHand := container.NewGridWithRows(2)
 	SAPSLabel := canvas.NewText("Player Hand:", tc.White)
 
 	SAPSHand.Add(SAPSLabel)
-
-	SAStats.Add(SACardsLeft)
+	SAPSHand.Add(SACardsLeft)
 	SAStats.Add(SAPSHand)
 	SAStats.Add(PS.SACards)
+
+	SAPSDiscards := container.NewGridWithRows(2)
+	SAPSDiscardsLabel := canvas.NewText("Player Discards:", tc.White)
+	SAPSDiscards.Add(SAPSDiscardsLabel)
+	SAPSDiscards.Add(PS.SADiscards)
+	SAStats.Add(SAPSDiscards)
 	config.FyneStatsWin.SetContent(SAStats)
 
 	config.FyneStatsWin.SetTitle("Statistics")
