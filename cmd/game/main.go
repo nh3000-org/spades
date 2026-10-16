@@ -165,7 +165,7 @@ func Turn(button int) {
 
 	//log.Println("draw card ", dc.Rank, dc.Suit)
 
-	log.Println("Turn count START", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
+	log.Println("Turn count ", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
 	//TurnCount++
 	if button == PSButtonkeep {
 		PS.ButtonKeep.Disable()
@@ -174,7 +174,7 @@ func Turn(button int) {
 		PS.ButtonRegularnil.Disable()
 		PS.ButtonBid.Disable()
 		PS.BidValue.Disable()
-		log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+		log.Println(TurnCount, PlayerTurn, "Keep")
 		TurnCount++
 
 		HandleCard()
@@ -187,7 +187,7 @@ func Turn(button int) {
 		PS.ButtonRegularnil.Disable()
 		PS.ButtonBid.Disable()
 		PS.BidValue.Disable()
-		log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+		log.Println(TurnCount, PlayerTurn, "Discard")
 		TurnCount++
 
 		HandleCard()
@@ -200,7 +200,7 @@ func Turn(button int) {
 		NPC.ButtonRegularnil.Disable()
 		NPC.ButtonBid.Disable()
 		NPC.BidValue.Disable()
-		log.Println("Button Keep", TurnCount, "turn", PlayerTurn)
+		log.Println(TurnCount, PlayerTurn, "Keep")
 		TurnCount++
 
 		HandleCard()
@@ -213,7 +213,7 @@ func Turn(button int) {
 		NPC.ButtonRegularnil.Disable()
 		NPC.ButtonBid.Disable()
 		NPC.BidValue.Disable()
-		log.Println("Button Discard", TurnCount, "turn", PlayerTurn)
+		log.Println(TurnCount, PlayerTurn, "Discard")
 		TurnCount++
 
 		HandleCard()
@@ -243,7 +243,7 @@ func Turn(button int) {
 	   		// npc
 
 	   	} */
-	log.Println("Turn count ", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
+
 	if TurnCount > 2 {
 
 		TurnCount = 1
@@ -264,7 +264,6 @@ func Turn(button int) {
 		}
 		if ShadowTurn == "NPC" {
 			PlayerTurn = "PLAYER"
-			log.Println("PLAYER TURN")
 			PS.ButtonKeep.Enable()
 			PS.ButtonDiscard.Enable()
 			PS.ButtonBlindnil.Disable()
@@ -577,7 +576,7 @@ func setupgui() {
 	PS.SADiscards = container.NewHBox()
 	PS.ButtonDiscard = widget.NewButton("Discard", func() {
 		PS.CardDiscardList = append(PS.CardDiscardList, DrawCardSort)
-		sort.Strings(PS.CardList)
+		sort.Strings(PS.CardDiscardList)
 		PS.SADiscards.RemoveAll()
 		for _, card := range PS.CardDiscardList {
 			s := strings.Split(card, ":")
@@ -686,12 +685,13 @@ func setupgui() {
 	SACLabel := canvas.NewText("Cards Left:", tc.White)
 	SACardsLeft.Add(SACLabel)
 	SACardsLeft.Add(CardsLeft)
+	SAStats.Add(SACardsLeft)
 
 	SAPSHand := container.NewGridWithRows(2)
 	SAPSLabel := canvas.NewText("Player Hand:", tc.White)
 
 	SAPSHand.Add(SAPSLabel)
-	SAPSHand.Add(SACardsLeft)
+
 	SAStats.Add(SAPSHand)
 	SAStats.Add(PS.SACards)
 
