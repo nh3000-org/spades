@@ -723,6 +723,10 @@ func play() {
 	GameBoard.Add(PS.Bidbar)
 	GameBoard.Add(PS.ScoreBar)
 }
+func dobid() {
+
+}
+
 func bid() {
 	GameBoard.RemoveAll()
 	GameBoard.Add(NPC.ScoreBar)
@@ -736,6 +740,12 @@ func bid() {
 	turn := "Please Bid " + config.PlayerName
 	if PlayerTurn == "NPC" {
 		turn = "Computer Bidding"
+		dobid()
+		turn = "Player Bidding"
+	} else {
+		turn = "Player Bidding"
+		turn = "Computer Bidding"
+		dobid()
 
 	}
 	ActionBid = canvas.NewText(turn, tc.White)
