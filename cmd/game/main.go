@@ -160,10 +160,6 @@ var ShadowTurn string
 func Turn(button int) {
 
 	ShadowTurn = PlayerTurn
-	//CardsLeft.Text = strconv.Itoa(len(MyDeck))
-	//SACardsLeft.Refresh()
-
-	//log.Println("draw card ", dc.Rank, dc.Suit)
 
 	log.Println("Turn count ", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
 	//TurnCount++
@@ -219,30 +215,6 @@ func Turn(button int) {
 		HandleCard()
 
 	}
-	/* 	log.Println("Turn count 1", TurnCount, "turn", PlayerTurn, "DR", DrawRank, "DS", DrawSuit, "CL", CardsLeft.Text)
-	   	if TurnCount == 2 {
-	   		// player
-	   		if PlayerTurn == "PLAYER" {
-	   			PS.ButtonKeep.Enable()
-	   			PS.ButtonDiscard.Enable()
-	   			NPC.ButtonKeep.Disable()
-	   			NPC.ButtonDiscard.Disable()
-
-	   			TurnCount++
-
-	   		}
-	   		if PlayerTurn == "NPC" {
-	   			NPC.ButtonKeep.Enable()
-	   			NPC.ButtonDiscard.Enable()
-	   			PS.ButtonKeep.Disable()
-	   			PS.ButtonDiscard.Disable()
-
-	   			TurnCount++
-
-	   		}
-	   		// npc
-
-	   	} */
 
 	if TurnCount > 2 {
 
@@ -421,28 +393,52 @@ func setupgui() {
 	NPC.Tricks.TextSize = 32
 
 	NPC.Cards = container.NewHBox()
+	NPC.SACards = container.NewHBox()
 	NPC.ButtonKeep = widget.NewButton("Keep", func() {
 
 		NPC.CardList = append(NPC.CardList, DrawCardSort)
 		sort.Strings(NPC.CardList)
 		NPC.Cards.RemoveAll()
-		for _, card := range NPC.CardList {
 
+		NPC.SACards.RemoveAll()
+		for _, card := range NPC.CardList {
 			s := strings.Split(card, ":")
 			c := cropImage(s[1])
 			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
 
 			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
 			NPC.Cards.Add(c)
+			d := cropImage(s[1])
+			d.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+
+			d.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
+			NPC.SACards.Add(d)
 		}
+
+		NPC.Cards.Refresh()
+		NPC.SACards.Refresh()
+
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
-		NPC.Cards.Refresh()
+
 		Turn(NPCButtonkeep)
 
 	})
+	NPC.SADiscards = container.NewHBox()
 	NPC.ButtonDiscard = widget.NewButton("Discard", func() {
 		NPC.CardDiscardList = append(NPC.CardDiscardList, DrawCardSort)
+
+		sort.Strings(NPC.CardDiscardList)
+		NPC.SADiscards.RemoveAll()
+		for _, card := range NPC.CardDiscardList {
+			s := strings.Split(card, ":")
+			c := cropImage(s[1])
+			c.FillMode = canvas.ImageFill(canvas.ImageScalePixels)
+
+			c.SetMinSize(fyne.NewSize(50*Sizew, 100*Sizeh))
+			NPC.SADiscards.Add(c)
+		}
+		NPC.SADiscards.Refresh()
 		NPC.ButtonBlindnil.Disable()
 		NPC.ButtonSTM.Disable()
 		Turn(NPCButtondiscard)
@@ -687,14 +683,22 @@ func setupgui() {
 	SACardsLeft.Add(CardsLeft)
 	SAStats.Add(SACardsLeft)
 
+	SANPCHand := container.NewGridWithRows(2)
+	SANPCLabel := canvas.NewText("NPC Hand:", tc.White)
+	SANPCHand.Add(SANPCLabel)
+	SAStats.Add(SANPCHand)
+	SAStats.Add(NPC.SACards)
+	SANPCDiscards := container.NewGridWithRows(2)
+	SANPCDiscardsLabel := canvas.NewText("NPC Discards:", tc.White)
+	SANPCDiscards.Add(SANPCDiscardsLabel)
+	SANPCDiscards.Add(NPC.SADiscards)
+	SAStats.Add(SANPCDiscards)
+
 	SAPSHand := container.NewGridWithRows(2)
 	SAPSLabel := canvas.NewText("Player Hand:", tc.White)
-
 	SAPSHand.Add(SAPSLabel)
-
 	SAStats.Add(SAPSHand)
 	SAStats.Add(PS.SACards)
-
 	SAPSDiscards := container.NewGridWithRows(2)
 	SAPSDiscardsLabel := canvas.NewText("Player Discards:", tc.White)
 	SAPSDiscards.Add(SAPSDiscardsLabel)
